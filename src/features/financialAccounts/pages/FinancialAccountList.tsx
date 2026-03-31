@@ -4,7 +4,8 @@ import {
   headerStyle,
   headerCellStyle,
   editableCell,
-  editingCell
+  editingCell,
+  cellWithDivider 
 } from "../styles";
 
 import type {
@@ -176,22 +177,20 @@ export default function FinancialAccountList() {
         <Table>
           <TableHead sx={headerStyle}>
             <TableRow>
-              <TableCell sx={headerCellStyle}>Category</TableCell>
-              <TableCell sx={headerCellStyle}>Value Invested</TableCell>
-              <TableCell sx={headerCellStyle}>Current Value</TableCell>
-              <TableCell sx={headerCellStyle}>Profit</TableCell>
-              <TableCell sx={headerCellStyle}>Notes</TableCell>
-              <TableCell sx={headerCellStyle}>Actions</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Category</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Value Invested</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Current Value</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Profit</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Notes</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Actions</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
             {data?.financialAccountList.map((acc) => (
               <TableRow key={acc.id}>
-
-                {/* ✅ CATEGORY */}
                 <TableCell
-                  sx={editableCell}
+                  sx={{ ...editableCell, ...cellWithDivider }}
                   onClick={() => startEdit(acc.id, "type", acc.type)}
                 >
                   {editing?.id === acc.id && editing.field === "type" ? (
@@ -220,10 +219,8 @@ export default function FinancialAccountList() {
                     formatCategoryLabel(acc.type)
                   )}
                 </TableCell>
-
-                {/* ✅ VALUE INVESTED */}
                 <TableCell
-                  sx={editableCell}
+                  sx={{ ...editableCell, ...cellWithDivider }}
                   onClick={() =>
                     startEdit(acc.id, "valueInvested", acc.valueInvested)
                   }
@@ -253,10 +250,8 @@ export default function FinancialAccountList() {
                     })
                   )}
                 </TableCell>
-
-                {/* ✅ CURRENT VALUE */}
                 <TableCell
-                  sx={editableCell}
+                  sx={{ ...editableCell, ...cellWithDivider }}
                   onClick={() =>
                     startEdit(acc.id, "currentValue", acc.currentValue)
                   }
@@ -286,18 +281,14 @@ export default function FinancialAccountList() {
                     )
                   )}
                 </TableCell>
-
-                {/* ✅ PROFIT */}
-                <TableCell>
+                <TableCell sx={{ ...cellWithDivider }}>
                   {(acc.profit ?? 0).toLocaleString("pt-PT", {
                     style: "currency",
                     currency: "EUR"
                   })}
                 </TableCell>
-
-                {/* ✅ NOTES */}
                 <TableCell
-                  sx={editableCell}
+                  sx={{ ...editableCell, ...cellWithDivider }}
                   onClick={() =>
                     startEdit(acc.id, "notes", acc.notes ?? "")
                   }
@@ -325,9 +316,7 @@ export default function FinancialAccountList() {
                     acc.notes
                   )}
                 </TableCell>
-
-                {/* ✅ DELETE */}
-                <TableCell>
+                <TableCell sx={{ ...cellWithDivider }}>
                   <Button
                     variant="outlined"
                     color="error"
