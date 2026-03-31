@@ -118,31 +118,53 @@ export default function FinancialAccountList() {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h1>Financial Accounts</h1>
 
       {data && (
         <Box
-          sx={{
-            mt: 2,
-            mb: 2,
-            padding: "1rem",
-            borderRadius: "8px",
-            backgroundColor: "#f5f5f5",
-            fontSize: "1.5rem",
-            fontWeight: 600
-          }}
-        >
-          Total Financeiro:{" "}
-          {data.totalCurrentValue.toLocaleString("pt-PT", {
-            style: "currency",
-            currency: "EUR"
-          })}
-        </Box>
-      )}
+  sx={{ 
+    display: "flex", 
+    alignItems: "center", 
+    justifyContent: "space-between",
+    position: "sticky",
+    top: 0,
+    zIndex: 5,
+    backgroundColor: "white",
+    paddingY: 1,
+    borderBottom: "1px solid #ddd"
+  }}
+>
+  <Box>
+    <h1 style={{ margin: 0 }}>Financial Accounts</h1>
+  </Box>
 
-      <Button variant="contained" onClick={() => setOpenAdd(true)}>
-        Add Financial Account
-      </Button>
+  {data && (
+    <Box
+      sx={{
+        padding: "0.6rem 1rem",
+        borderRadius: "6px",
+        backgroundColor: "#f5f5f5",
+        fontSize: "1.1rem",
+        fontWeight: 600,
+        whiteSpace: "nowrap"
+      }}
+    >
+      Total Financeiro:{" "}
+      {data.totalCurrentValue.toLocaleString("pt-PT", {
+        style: "currency",
+        currency: "EUR",
+      })}
+    </Box>
+  )}
+
+</Box>
+    )}
+
+    <Button
+  variant="contained" 
+  sx={{ mt: 2 }}
+  onClick={() => setOpenAdd(true)}>
+  Add Financial Account
+</Button>
 
       <AddFinancialAccountModal
         open={openAdd}
