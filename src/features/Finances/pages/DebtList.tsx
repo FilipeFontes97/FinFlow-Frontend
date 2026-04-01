@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   Paper,
+  TextField,
   Table,
   TableBody,
   TableCell,
@@ -23,7 +24,7 @@ import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
-import { headerStyle, headerCellStyle, cellWithDivider } from "../styles";
+import { headerStyle, headerCellStyle, cellWithDivider, editableCell, editingCell } from "../styles";
 
 import AddDebtModal from "../components/AddDebtModal";
 import AddPaymentModal from "../components/AddPaymentModal";
@@ -35,6 +36,8 @@ const pageTitleSx = {
   fontSize: "2.6rem",
   fontWeight: 700,
   lineHeight: 1.1,
+  color: "#0f172a",
+  textShadow: "0 1px 2px rgba(255, 255, 255, 0.6)",
 };
 
 const summaryBoxSx = {
@@ -56,6 +59,8 @@ export default function DebtList() {
   const [selectedDebtName, setSelectedDebtName] = useState("");
   const [openDeleteDebt, setOpenDeleteDebt] = useState(false);
   const [debtToDelete, setDebtToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [editingNoteDebtId, setEditingNoteDebtId] = useState<string | null>(null);
+  const [localNoteValue, setLocalNoteValue] = useState("");
 
   function formatSplitValue(value: number | string) {
     const normalized = String(value).trim().toLowerCase();
@@ -108,6 +113,24 @@ export default function DebtList() {
     setDebtToDelete(null);
   }
 
+  function startNoteEdit(debtId: string, currentNote?: string) {
+    setEditingNoteDebtId(debtId);
+    setLocalNoteValue(currentNote ?? "");
+  }
+
+  async function saveNoteEdit(debtId: string) {
+    const debt = debts.find((d) => d.id === debtId);
+    if (!debt) return;
+
+    await debtService.update(debtId, {
+      ...debt,
+      notes: localNoteValue,
+    });
+
+    setEditingNoteDebtId(null);
+    await loadDebts();
+  }
+
 useEffect(() => {
   const fetchDebts = async () => {
     const data = await debtService.getAll();
@@ -133,7 +156,7 @@ useEffect(() => {
           pb: 1,
           position: "sticky",
           top: 0,
-          backgroundColor: "white",
+          backgroundColor: "transparent",
           zIndex: 10,
           borderBottom: "1px solid #ddd",
         }}
@@ -251,11 +274,47 @@ useEffect(() => {
                 </TableCell>
 
                 <TableCell sx={{ ...cellWithDivider }}>
-                  {formatSplitValue(d.paymentPortions as number | string)}
+                  <Box sx={{ lineHeight: 1.1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {formatSplitValue(d.paymentPortions as number | string)}
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ ml: 0.75 }}
+                      >
+                        {`${d.payments?.length ?? 0} payment${(d.payments?.length ?? 0) === 1 ? "" : "s"}`}
+                      </Typography>
+                    </Typography>
+                  </Box>
                 </TableCell>
 
-                <TableCell sx={{ ...cellWithDivider }}>
-                  {d.notes?.trim() ? d.notes : "-"}
+                <TableCell
+                  sx={{ ...editableCell, ...cellWithDivider }}
+                  onClick={() => startNoteEdit(d.id, d.notes)}
+                >
+                  {editingNoteDebtId === d.id ? (
+                    <TextField
+                      autoFocus
+                      variant="standard"
+                      multiline
+                      minRows={1}
+                      maxRows={3}
+                      sx={editingCell}
+                      value={localNoteValue}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => setLocalNoteValue(e.target.value)}
+                      onBlur={() => saveNoteEdit(d.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          e.currentTarget.blur();
+                        }
+                      }}
+                    />
+                  ) : (
+                    d.notes?.trim() ? d.notes : "-"
+                  )}
                 </TableCell>
 
                 <TableCell sx={{ ...cellWithDivider }}>
@@ -292,18 +351,18 @@ useEffect(() => {
                     </span>
                   </Tooltip>
                   <Tooltip title="View payment history">
-                  <IconButton
-                    size="small"
-                    color="secondary"
-                    onClick={() => {
-                      setSelectedDebtName(d.itemName);
-                      setSelectedPayments(d.payments);
-                      setOpenHistory(true);
-                    }}
-                  >
-                    <ReceiptLongOutlinedIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                    <IconButton
+                      size="small"
+                      color="secondary"
+                      onClick={() => {
+                        setSelectedDebtName(d.itemName);
+                        setSelectedPayments(d.payments);
+                        setOpenHistory(true);
+                      }}
+                    >
+                      <ReceiptLongOutlinedIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                   <Tooltip title="Delete debt">
                     <IconButton
                       size="small"
