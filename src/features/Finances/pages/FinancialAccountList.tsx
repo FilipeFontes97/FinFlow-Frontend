@@ -40,6 +40,8 @@ const pageTitleSx = {
   fontSize: "2.6rem",
   fontWeight: 700,
   lineHeight: 1.1,
+  color: "#0f172a",
+  textShadow: "0 1px 2px rgba(255, 255, 255, 0.6)",
 };
 
 const summaryBoxSx = {
@@ -151,7 +153,7 @@ export default function FinancialAccountList() {
     position: "sticky",
     top: 0,
     zIndex: 5,
-    backgroundColor: "white",
+    backgroundColor: "transparent",
     pb: 1,
     borderBottom: "1px solid #ddd"
   }}

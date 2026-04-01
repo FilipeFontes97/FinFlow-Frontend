@@ -2,6 +2,7 @@ import { Drawer, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/m
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import { useLocation, useNavigate } from "react-router-dom";
+import sidebarMoneyBg from "../../../assets/moneypattern.jpg";
 
 const drawerWidth = 220;
 
@@ -18,6 +19,11 @@ export default function Sidebar() {
         "& .MuiDrawer-paper": {
           width: drawerWidth,
           boxSizing: "border-box",
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.86)), url(${sidebarMoneyBg})`,
+          borderRight: "1px solid rgba(255, 255, 255, 0.86)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
         },
       }}
     >
