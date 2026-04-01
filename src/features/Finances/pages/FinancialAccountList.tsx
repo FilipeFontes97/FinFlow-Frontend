@@ -24,11 +24,28 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Box
+  Box,
+  Typography
 } from "@mui/material";
 
 import ConfirmDeleteDialog from "../components/ConfirmDeleteModal";
 import AddFinancialAccountModal from "../components/AddFinancialAccountModal";
+
+const pageTitleSx = {
+  margin: 0,
+  fontSize: "3rem",
+  fontWeight: 700,
+  lineHeight: 1.1,
+};
+
+const summaryBoxSx = {
+  padding: "0.6rem 1rem",
+  borderRadius: "6px",
+  backgroundColor: "#f5f5f5",
+  fontSize: "1.1rem",
+  fontWeight: 600,
+  whiteSpace: "nowrap",
+};
 
 export default function FinancialAccountList() {
   const [data, setData] = useState<FinancialAccountListResponse | null>(null);
@@ -118,7 +135,7 @@ export default function FinancialAccountList() {
   }
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <Box sx={{ p: 3 }}>
 
       {data && (
         <Box
@@ -126,30 +143,24 @@ export default function FinancialAccountList() {
     display: "flex", 
     alignItems: "center", 
     justifyContent: "space-between",
+    mb: 2,
     position: "sticky",
     top: 0,
     zIndex: 5,
     backgroundColor: "white",
-    paddingY: 1,
+    pb: 1,
     borderBottom: "1px solid #ddd"
   }}
 >
   <Box>
-    <h1 style={{ margin: 0 }}>Financial Accounts</h1>
+    <Typography component="h1" sx={pageTitleSx}>
+      Financial Accounts
+    </Typography>
   </Box>
 
   {data && (
-    <Box
-      sx={{
-        padding: "0.6rem 1rem",
-        borderRadius: "6px",
-        backgroundColor: "#f5f5f5",
-        fontSize: "1.1rem",
-        fontWeight: 600,
-        whiteSpace: "nowrap"
-      }}
-    >
-      Total Financeiro:{" "}
+    <Box sx={summaryBoxSx}>
+      Net Worth:{" "}
       {data.totalCurrentValue.toLocaleString("pt-PT", {
         style: "currency",
         currency: "EUR",
@@ -162,9 +173,9 @@ export default function FinancialAccountList() {
 
     <Button
   variant="contained" 
-  sx={{ mt: 2 }}
+  sx={{ mb: 2 }}
   onClick={() => setOpenAdd(true)}>
-  Add Financial Account
+  Add Account
 </Button>
 
       <AddFinancialAccountModal
@@ -173,8 +184,16 @@ export default function FinancialAccountList() {
         onCreated={() => financialAccountService.getAll().then(setData)}
       />
 
-      <TableContainer component={Paper} sx={{ marginTop: 2 }}>
-        <Table>
+      <TableContainer component={Paper}>
+        <Table
+          size="small"
+          sx={{
+            "& .MuiTableCell-root": {
+              py: 0.75,
+              px: 1,
+            },
+          }}
+        >
           <TableHead sx={headerStyle}>
             <TableRow>
               <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Category</TableCell>
@@ -337,6 +356,6 @@ export default function FinancialAccountList() {
         onClose={() => setOpenDelete(false)}
         onConfirm={confirmDelete}
       />
-    </div>
+    </Box>
   );
 }

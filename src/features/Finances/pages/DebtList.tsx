@@ -2,12 +2,29 @@ import { useEffect, useState } from "react";
 import { debtService } from "../services/debtService";
 import type { DebtResponse } from "../types/Debt";
 import { DebtStatus } from "../types/Debt";
+import { headerStyle, headerCellStyle, cellWithDivider } from "../styles";
 
 
 import {
   Box, Button, Paper, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Chip
+  TableContainer, TableHead, TableRow, Chip, Typography
 } from "@mui/material";
+
+const pageTitleSx = {
+  margin: 0,
+  fontSize: "3rem",
+  fontWeight: 700,
+  lineHeight: 1.1,
+};
+
+const summaryBoxSx = {
+  padding: "0.6rem 1rem",
+  borderRadius: "6px",
+  backgroundColor: "#f5f5f5",
+  fontSize: "1.1rem",
+  fontWeight: 600,
+  whiteSpace: "nowrap",
+};
 
 export default function DebtList() {
   const [debts, setDebts] = useState<DebtResponse[]>([]);
@@ -40,23 +57,23 @@ export default function DebtList() {
           top: 0,
           backgroundColor: "white",
           zIndex: 10,
-          pb: 1
+          pb: 1,
+          borderBottom: "1px solid #ddd"
         }}
       >
         <Box>
-          <h1 style={{ margin: 0 }}>Debts</h1>
+          <Typography component="h1" sx={pageTitleSx}>
+            Debts
+          </Typography>
         </Box>
 
         <Box
           sx={{
-            px: 2,
-            py: 1,
-            borderRadius: 2,
-            backgroundColor: "#f5f5f5",
-            fontWeight: 600
+            ...summaryBoxSx,
+            color: totalRemaining > 0 ? "error.main" : "text.secondary",
           }}
         >
-          Total em Dívida:{" "}
+          Debt:{" "}
           {totalRemaining.toLocaleString("pt-PT", {
             style: "currency",
             currency: "EUR"
@@ -69,17 +86,25 @@ export default function DebtList() {
       </Button>
 
       <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
+        <Table
+          size="small"
+          sx={{
+            "& .MuiTableCell-root": {
+              py: 0.75,
+              px: 1,
+            },
+          }}
+        >
+          <TableHead sx={headerStyle}>
             <TableRow>
-              <TableCell>Item</TableCell>
-              <TableCell>Total</TableCell>
-              <TableCell>Paid</TableCell>
-              <TableCell>Remaining</TableCell>
-              <TableCell>Split</TableCell>
-              <TableCell>Last Payment</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Item</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Total</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Paid</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Remaining</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Split</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Last Payment</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Status</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Actions</TableCell>
             </TableRow>
           </TableHead>
 
