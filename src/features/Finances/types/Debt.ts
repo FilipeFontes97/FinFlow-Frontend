@@ -5,6 +5,13 @@ export const DebtStatus = {
 
 export type DebtStatus = typeof DebtStatus[keyof typeof DebtStatus];
 
+export interface Payment {
+  id: string;
+  amount: number;
+  date: string;
+}
+
+
 export interface DebtResponse {
   id: string;
   itemName: string;
@@ -15,4 +22,12 @@ export interface DebtResponse {
   paymentPortions: number;
   notes?: string;
   debtStatus: DebtStatus;
+  payments: Payment[]
+}
+
+export interface DebtCreateRequest {
+  itemName: string;
+  totalAmount: number;
+  paymentPortions: number;
+  notes?: string;
 }
