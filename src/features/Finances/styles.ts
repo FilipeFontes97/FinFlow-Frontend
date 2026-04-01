@@ -23,8 +23,14 @@ export const editingCell = {
 };
 
 export const cellWithDivider = {
-  borderRight: "1px solid #e0e0e0",
+  borderRight: "0.5px solid #e8e8e8",
   "&:last-child": {
     borderRight: "none"
   }
+};
+
+export const thinTableLines = {
+  "& .MuiTableCell-root": {
+    borderBottom: "0.5px solid #e8e8e8",
+  },
 };
