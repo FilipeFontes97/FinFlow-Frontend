@@ -1,5 +1,5 @@
 import http from "../../../api/http";
-import type { DebtResponse } from "../types/Debt";
+import type { DebtCreateRequest, DebtResponse } from "../types/Debt";
 
 export const debtService = {
   getAll: async (): Promise<DebtResponse[]> => {
@@ -7,7 +7,7 @@ export const debtService = {
     return res.data;
   },
 
-  create: async (payload: DebtResponse): Promise<DebtResponse> => {
+  create: async (payload: DebtCreateRequest): Promise<DebtResponse> => {
     const res = await http.post("/Debt/createDebt", payload);
     return res.data;
   },

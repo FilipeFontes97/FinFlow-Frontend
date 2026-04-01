@@ -11,6 +11,12 @@ import {
 
 import { financialAccountService } from "../services/financialAccountService";
 import type { CreateFinancialAccountRequest } from "../types/FinancialAccount";
+import {
+  dialogActionsSx,
+  dialogTitleSx,
+  modalCancelButtonSx,
+  modalPrimaryButtonSx,
+} from "./modalStyles";
 
 interface Props {
   open: boolean;
@@ -92,7 +98,7 @@ type FormErrors = {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Add Financial Account</DialogTitle>
+      <DialogTitle sx={dialogTitleSx}>Add Financial Account</DialogTitle>
 
       <DialogContent
         sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
@@ -155,9 +161,9 @@ type FormErrors = {
         />
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>
+      <DialogActions sx={dialogActionsSx}>
+        <Button variant="outlined" sx={modalCancelButtonSx} onClick={onClose}>Cancel</Button>
+        <Button variant="contained" sx={modalPrimaryButtonSx} onClick={handleSubmit}>
           Add
         </Button>
       </DialogActions>

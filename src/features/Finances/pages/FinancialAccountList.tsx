@@ -25,15 +25,19 @@ import {
   TableRow,
   Paper,
   Box,
-  Typography
+  Typography,
+  IconButton,
+  Tooltip
 } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
 
 import ConfirmDeleteDialog from "../components/ConfirmDeleteModal";
 import AddFinancialAccountModal from "../components/AddFinancialAccountModal";
 
 const pageTitleSx = {
   margin: 0,
-  fontSize: "3rem",
+  fontSize: "2.6rem",
   fontWeight: 700,
   lineHeight: 1.1,
 };
@@ -135,7 +139,7 @@ export default function FinancialAccountList() {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ width: "100%" }}>
 
       {data && (
         <Box
@@ -172,8 +176,22 @@ export default function FinancialAccountList() {
     )}
 
     <Button
-  variant="contained" 
-  sx={{ mb: 2 }}
+  variant="contained"
+  size="small"
+  startIcon={<SavingsOutlinedIcon fontSize="small" />}
+  sx={{
+    mb: 2,
+    px: 1.5,
+    py: 0.5,
+    fontSize: "0.8rem",
+    fontWeight: 600,
+    borderRadius: "10px",
+    textTransform: "none",
+    backgroundColor: "#059669",
+    "&:hover": {
+      backgroundColor: "#047857",
+    },
+  }}
   onClick={() => setOpenAdd(true)}>
   Add Account
 </Button>
@@ -336,14 +354,16 @@ export default function FinancialAccountList() {
                   )}
                 </TableCell>
                 <TableCell sx={{ ...cellWithDivider }}>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                    onClick={() => handleDeleteClick(acc.id)}
-                  >
-                    Delete
-                  </Button>
+                  <Tooltip title="Delete">
+                    <IconButton
+                      color="error"
+                      size="small"
+                      aria-label="delete account"
+                      onClick={() => handleDeleteClick(acc.id)}
+                    >
+                      <DeleteOutlineIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}

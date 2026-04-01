@@ -2,17 +2,37 @@ import { useEffect, useState } from "react";
 import { debtService } from "../services/debtService";
 import type { DebtResponse } from "../types/Debt";
 import { DebtStatus } from "../types/Debt";
-import { headerStyle, headerCellStyle, cellWithDivider } from "../styles";
-
+import type { Payment } from "../types/Debt";
 
 import {
-  Box, Button, Paper, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Chip, Typography
+  Box,
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Typography,
+  IconButton,
+  Tooltip
 } from "@mui/material";
+import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+
+import { headerStyle, headerCellStyle, cellWithDivider } from "../styles";
+
+import AddDebtModal from "../components/AddDebtModal";
+import AddPaymentModal from "../components/AddPaymentModal";
+import PaymentHistoryModal from "../components/PaymentHistoryModal.tsx";
+import ConfirmDeleteDialog from "../components/ConfirmDeleteModal";
 
 const pageTitleSx = {
   margin: 0,
-  fontSize: "3rem",
+  fontSize: "2.6rem",
   fontWeight: 700,
   lineHeight: 1.1,
 };
@@ -28,8 +48,67 @@ const summaryBoxSx = {
 
 export default function DebtList() {
   const [debts, setDebts] = useState<DebtResponse[]>([]);
+  const [openAddDebt, setOpenAddDebt] = useState(false);
+  const [openAddPayment, setOpenAddPayment] = useState(false);
+  const [selectedDebtId, setSelectedDebtId] = useState<string | null>(null);
+  const [openHistory, setOpenHistory] = useState(false);
+  const [selectedPayments, setSelectedPayments] = useState<Payment[]>([]);
+  const [selectedDebtName, setSelectedDebtName] = useState("");
+  const [openDeleteDebt, setOpenDeleteDebt] = useState(false);
+  const [debtToDelete, setDebtToDelete] = useState<{ id: string; name: string } | null>(null);
 
- useEffect(() => {
+  function formatSplitValue(value: number | string) {
+    const normalized = String(value).trim().toLowerCase();
+
+    const digits = normalized.match(/\d+/)?.[0];
+    if (digits) {
+      return `${digits}x`;
+    }
+
+    const lettersOnly = normalized.replace(/[^a-z]/g, "");
+
+    if (lettersOnly.includes("twentyfour") || lettersOnly.includes("vintequatro")) {
+      return "24x";
+    }
+
+    if (lettersOnly.includes("twelve") || lettersOnly.includes("doze")) {
+      return "12x";
+    }
+
+    if (lettersOnly.includes("six") || lettersOnly.includes("seis") || lettersOnly === "si") {
+      return "6x";
+    }
+
+    if (lettersOnly.includes("three") || lettersOnly.includes("tres")) {
+      return "3x";
+    }
+
+    if (lettersOnly.includes("one") || lettersOnly.includes("um")) {
+      return "One-time payment";
+    }
+
+    return `${lettersOnly || normalized}x`;
+  }
+
+  async function loadDebts() {
+    const data = await debtService.getAll();
+    setDebts(data);
+  }
+
+  function handleDeleteDebtClick(id: string, itemName: string) {
+    setDebtToDelete({ id, name: itemName });
+    setOpenDeleteDebt(true);
+  }
+
+  async function confirmDeleteDebt() {
+    if (!debtToDelete) return;
+    await debtService.delete(debtToDelete.id);
+    await loadDebts();
+    setOpenDeleteDebt(false);
+    setDebtToDelete(null);
+  }
+
+useEffect(() => {
   const fetchDebts = async () => {
     const data = await debtService.getAll();
     setDebts(data);
@@ -38,34 +117,30 @@ export default function DebtList() {
   fetchDebts();
 }, []);
 
-
   const totalRemaining = debts.reduce(
     (sum, d) => sum + d.remainingAmount,
     0
   );
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
+    <Box sx={{ width: "100%" }}>
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           mb: 2,
+          pb: 1,
           position: "sticky",
           top: 0,
           backgroundColor: "white",
           zIndex: 10,
-          pb: 1,
-          borderBottom: "1px solid #ddd"
+          borderBottom: "1px solid #ddd",
         }}
       >
-        <Box>
-          <Typography component="h1" sx={pageTitleSx}>
-            Debts
-          </Typography>
-        </Box>
+        <Typography component="h1" sx={pageTitleSx}>
+          Debts
+        </Typography>
 
         <Box
           sx={{
@@ -73,18 +148,34 @@ export default function DebtList() {
             color: totalRemaining > 0 ? "error.main" : "text.secondary",
           }}
         >
-          Debt:{" "}
+         Debt:{" "}
           {totalRemaining.toLocaleString("pt-PT", {
             style: "currency",
-            currency: "EUR"
+            currency: "EUR",
           })}
         </Box>
       </Box>
-
-      <Button variant="contained" sx={{ mb: 2 }}>
+      <Button
+        variant="contained"
+        size="small"
+        startIcon={<ReceiptLongOutlinedIcon fontSize="small" />}
+        sx={{
+          mb: 2,
+          px: 1.5,
+          py: 0.5,
+          fontSize: "0.8rem",
+          fontWeight: 600,
+          borderRadius: "10px",
+          textTransform: "none",
+          backgroundColor: "#475569",
+          "&:hover": {
+            backgroundColor: "#334155",
+          },
+        }}
+        onClick={() => setOpenAddDebt(true)}
+      >
         Add Debt
       </Button>
-
       <TableContainer component={Paper}>
         <Table
           size="small"
@@ -97,71 +188,180 @@ export default function DebtList() {
         >
           <TableHead sx={headerStyle}>
             <TableRow>
-              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Item</TableCell>
-              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Total</TableCell>
-              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Paid</TableCell>
-              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Remaining</TableCell>
-              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Split</TableCell>
-              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Last Payment</TableCell>
-              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Status</TableCell>
-              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>Actions</TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>
+                Item
+              </TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>
+                Total
+              </TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>
+                Paid
+              </TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>
+                Remaining
+              </TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>
+                Split
+              </TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>
+                Notes
+              </TableCell>
+              <TableCell sx={{ ...headerCellStyle, ...cellWithDivider }}>
+                Status
+              </TableCell>
+              <TableCell sx={{ ...headerCellStyle }}>
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {debts.map(d => (
+            {debts.map((d) => (
               <TableRow key={d.id}>
-                <TableCell>{d.itemName}</TableCell>
+                <TableCell sx={{ ...cellWithDivider }}>{d.itemName}</TableCell>
 
-                <TableCell>
+                <TableCell sx={{ ...cellWithDivider }}>
                   {d.totalAmount.toLocaleString("pt-PT", {
                     style: "currency",
-                    currency: "EUR"
+                    currency: "EUR",
                   })}
                 </TableCell>
 
-                <TableCell>
+                <TableCell sx={{ ...cellWithDivider }}>
                   {d.amountPaid.toLocaleString("pt-PT", {
                     style: "currency",
-                    currency: "EUR"
+                    currency: "EUR",
                   })}
                 </TableCell>
 
                 <TableCell
-                  sx={{ fontWeight: 600, color: d.remainingAmount > 0 ? "error.main" : "success.main" }}
+                  sx={{
+                    ...cellWithDivider,
+                    fontWeight: 600,
+                    color:
+                      d.remainingAmount > 0
+                        ? "error.main"
+                        : "success.main",
+                  }}
                 >
                   {d.remainingAmount.toLocaleString("pt-PT", {
                     style: "currency",
-                    currency: "EUR"
+                    currency: "EUR",
                   })}
                 </TableCell>
 
-                <TableCell>{d.paymentPortions}x</TableCell>
-
-                <TableCell>
-                  {d.lastPaymentDate
-                    ? new Date(d.lastPaymentDate).toLocaleDateString("pt-PT")
-                    : "-"}
+                <TableCell sx={{ ...cellWithDivider }}>
+                  {formatSplitValue(d.paymentPortions as number | string)}
                 </TableCell>
 
-                <TableCell>
+                <TableCell sx={{ ...cellWithDivider }}>
+                  {d.notes?.trim() ? d.notes : "-"}
+                </TableCell>
+
+                <TableCell sx={{ ...cellWithDivider }}>
                   <Chip
-                    label={d.debtStatus === DebtStatus.Paid ? "Paid" : "In Debt"}
-                    color={d.debtStatus === DebtStatus.Paid ? "success" : "warning"}
                     size="small"
+                    label={
+                      d.debtStatus === DebtStatus.Paid
+                        ? "Paid"
+                        : "In Debt"
+                    }
+                    color={
+                      d.debtStatus === DebtStatus.Paid
+                        ? "success"
+                        : "warning"
+                    }
                   />
                 </TableCell>
 
                 <TableCell>
-                  <Button size="small">
-                    Add Payment
-                  </Button>
+                  <Tooltip title="Add Payment">
+                    <span>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        aria-label="add payment"
+                        disabled={d.debtStatus === DebtStatus.Paid}
+                        onClick={() => {
+                          setSelectedDebtId(d.id);
+                          setOpenAddPayment(true);
+                        }}
+                      >
+                        <PaymentsOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                  <Tooltip title="View payment history">
+                  <IconButton
+                    size="small"
+                    color="secondary"
+                    onClick={() => {
+                      setSelectedDebtName(d.itemName);
+                      setSelectedPayments(d.payments);
+                      setOpenHistory(true);
+                    }}
+                  >
+                    <ReceiptLongOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                  <Tooltip title="Delete debt">
+                    <IconButton
+                      size="small"
+                      color="error"
+                      aria-label="delete debt"
+                      onClick={() => handleDeleteDebtClick(d.id, d.itemName)}
+                    >
+                      <DeleteOutlineIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+
                 </TableCell>
               </TableRow>
             ))}
+
+            {debts.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={8} align="center">
+                  No debts found
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* MODALS */}
+      <AddDebtModal
+        open={openAddDebt}
+        onClose={() => setOpenAddDebt(false)}
+        onCreated={loadDebts}
+      />
+
+      <AddPaymentModal
+        open={openAddPayment}
+        debtId={selectedDebtId}
+        onClose={() => setOpenAddPayment(false)}
+        onCreated={loadDebts}
+      />
+
+      <PaymentHistoryModal
+        open={openHistory}
+        payments={selectedPayments}
+        itemName={selectedDebtName}
+        onClose={() => setOpenHistory(false)}
+      />
+
+      <ConfirmDeleteDialog
+        open={openDeleteDebt}
+        onClose={() => {
+          setOpenDeleteDebt(false);
+          setDebtToDelete(null);
+        }}
+        onConfirm={confirmDeleteDebt}
+        title="Delete Debt"
+        message={`Are you sure you want to delete ${debtToDelete?.name ? `"${debtToDelete.name}"` : "this debt"}? This action cannot be undone.`}
+        confirmLabel="Delete"
+      />
     </Box>
   );
 }
