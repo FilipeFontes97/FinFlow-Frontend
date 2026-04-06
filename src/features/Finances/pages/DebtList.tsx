@@ -231,9 +231,10 @@ useEffect(() => {
           fontWeight: 600,
           borderRadius: "10px",
           textTransform: "none",
-          backgroundColor: "#475569",
+          backgroundColor: "#e89a9a",
+          color: "#5f1d1d",
           "&:hover": {
-            backgroundColor: "#334155",
+            backgroundColor: "#dc8383",
           },
         }}
         onClick={() => setOpenAddDebt(true)}
