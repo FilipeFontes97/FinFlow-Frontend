@@ -11,6 +11,7 @@ export interface Payment {
   date: string;
 }
 
+export type PaymentPortionsValue = number | string;
 
 export interface DebtResponse {
   id: string;
@@ -19,7 +20,7 @@ export interface DebtResponse {
   amountPaid: number;
   remainingAmount: number;
   lastPaymentDate?: string;
-  paymentPortions: number;
+  paymentPortions: PaymentPortionsValue;
   notes?: string;
   debtStatus: DebtStatus;
   payments: Payment[]

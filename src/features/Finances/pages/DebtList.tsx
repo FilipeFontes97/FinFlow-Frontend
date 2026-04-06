@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { debtService } from "../services/debtService";
-import type { DebtResponse } from "../types/Debt";
+import type { DebtResponse, PaymentPortionsValue } from "../types/Debt";
 import { DebtStatus } from "../types/Debt";
 import type { Payment } from "../types/Debt";
 
@@ -21,6 +21,7 @@ import {
   Tooltip
 } from "@mui/material";
 import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
+import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
@@ -62,35 +63,52 @@ export default function DebtList() {
   const [editingNoteDebtId, setEditingNoteDebtId] = useState<string | null>(null);
   const [localNoteValue, setLocalNoteValue] = useState("");
 
-  function formatSplitValue(value: number | string) {
+  function resolvePaymentPortions(value: PaymentPortionsValue): number {
     const normalized = String(value).trim().toLowerCase();
 
     const digits = normalized.match(/\d+/)?.[0];
     if (digits) {
-      return `${digits}x`;
+      return Number(digits);
     }
 
     const lettersOnly = normalized.replace(/[^a-z]/g, "");
 
     if (lettersOnly.includes("twentyfour") || lettersOnly.includes("vintequatro")) {
-      return "24x";
+      return 24;
     }
 
     if (lettersOnly.includes("twelve") || lettersOnly.includes("doze")) {
-      return "12x";
+      return 12;
     }
 
     if (lettersOnly.includes("six") || lettersOnly.includes("seis") || lettersOnly === "si") {
-      return "6x";
+      return 6;
     }
 
     if (lettersOnly.includes("three") || lettersOnly.includes("tres")) {
-      return "3x";
+      return 3;
     }
 
     if (lettersOnly.includes("one") || lettersOnly.includes("um")) {
+      return 1;
+    }
+
+    return Number.NaN;
+  }
+
+  function formatSplitValue(value: PaymentPortionsValue) {
+    const resolvedValue = resolvePaymentPortions(value);
+
+    if (resolvedValue === 1) {
       return "One-time payment";
     }
+
+    if (Number.isFinite(resolvedValue) && resolvedValue > 1) {
+      return `${resolvedValue}x`;
+    }
+
+    const normalized = String(value).trim().toLowerCase();
+    const lettersOnly = normalized.replace(/[^a-z]/g, "");
 
     return `${lettersOnly || normalized}x`;
   }
@@ -130,6 +148,29 @@ export default function DebtList() {
     setEditingNoteDebtId(null);
     await loadDebts();
   }
+
+  function calculateNextInstallment(debt: DebtResponse): number {
+    const paymentPortions = resolvePaymentPortions(debt.paymentPortions);
+
+    if (!Number.isFinite(paymentPortions) || paymentPortions <= 1) {
+    return debt.remainingAmount;
+  }
+
+    const installment = debt.totalAmount / paymentPortions;
+
+  const roundedInstallment = Math.round(installment * 100) / 100;
+
+  return Math.min(roundedInstallment, debt.remainingAmount);
+}
+
+async function payInstallment(debt: DebtResponse) {
+  const amount = calculateNextInstallment(debt);
+
+  if (amount <= 0) return;
+
+  await debtService.addPayment(debt.id, amount);
+  await loadDebts();
+}
 
 useEffect(() => {
   const fetchDebts = async () => {
@@ -276,7 +317,7 @@ useEffect(() => {
                 <TableCell sx={{ ...cellWithDivider }}>
                   <Box sx={{ lineHeight: 1.1 }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {formatSplitValue(d.paymentPortions as number | string)}
+                      {formatSplitValue(d.paymentPortions)}
                       <Typography
                         component="span"
                         variant="caption"
@@ -350,6 +391,19 @@ useEffect(() => {
                       </IconButton>
                     </span>
                   </Tooltip>
+                  <Tooltip title={`Pay ${formatSplitValue(d.paymentPortions)}`}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="success"
+                          aria-label="pay next installment"
+                          disabled={d.debtStatus === DebtStatus.Paid}
+                          onClick={() => payInstallment(d)}
+                        >
+                          <PriceCheckOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </span>
+                  </Tooltip>
                   <Tooltip title="View payment history">
                     <IconButton
                       size="small"
@@ -373,7 +427,6 @@ useEffect(() => {
                       <DeleteOutlineIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
-
                 </TableCell>
               </TableRow>
             ))}
