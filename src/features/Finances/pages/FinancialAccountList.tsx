@@ -34,6 +34,7 @@ import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
 
 import ConfirmDeleteDialog from "../components/ConfirmDeleteModal";
 import AddFinancialAccountModal from "../components/AddFinancialAccountModal";
+import AddInvestmentModal from "../components/AddInvestmentModal";
 
 const pageTitleSx = {
   margin: 0,
@@ -59,6 +60,10 @@ export default function FinancialAccountList() {
   const [openAdd, setOpenAdd] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [openAddInvestment, setOpenAddInvestment] = useState(false);
+
+const [selectedAccountId, setSelectedAccountId] = useState<string>("");
+
 
   const [editing, setEditing] = useState<{
     id: string;
@@ -66,6 +71,11 @@ export default function FinancialAccountList() {
   } | null>(null);
 
   const [localEditValue, setLocalEditValue] = useState<string>("");
+
+  async function loadAccounts() {
+  const accounts = await financialAccountService.getAll();
+  setData(accounts);
+}
 
   function handleDeleteClick(id: string) {
     setSelectedId(id);
@@ -203,6 +213,14 @@ export default function FinancialAccountList() {
         onClose={() => setOpenAdd(false)}
         onCreated={() => financialAccountService.getAll().then(setData)}
       />
+
+
+ <AddInvestmentModal
+  open={openAddInvestment}
+  financialAccountId={selectedAccountId}
+  onClose={() => setOpenAddInvestment(false)}
+  onAdded={loadAccounts}
+/>
 
       <TableContainer component={Paper}>
         <Table
@@ -356,16 +374,39 @@ export default function FinancialAccountList() {
                   )}
                 </TableCell>
                 <TableCell sx={{ ...cellWithDivider }}>
-                  <Tooltip title="Delete">
-                    <IconButton
-                      color="error"
-                      size="small"
-                      aria-label="delete account"
-                      onClick={() => handleDeleteClick(acc.id)}
-                    >
-                      <DeleteOutlineIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
+                  <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+                    <Box sx={{ width: 32, display: "flex", justifyContent: "center" }}>
+                      {(
+                        acc.type === "ETF" ||
+                        acc.type === "Stocks" ||
+                        acc.type === "Crypto"
+                      ) && (
+                        <Tooltip title="Add investment">
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => {
+                              setSelectedAccountId(acc.id);
+                              setOpenAddInvestment(true);
+                            }}
+                          >
+                            <SavingsOutlinedIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
+
+                    <Tooltip title="Delete">
+                      <IconButton
+                        color="error"
+                        size="small"
+                        aria-label="delete account"
+                        onClick={() => handleDeleteClick(acc.id)}
+                      >
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}

@@ -227,7 +227,7 @@ export default function FixedExpensesList() {
         </Typography>
 
         <Box sx={summaryBoxSx}>
-          Total Monthly{" "}
+          Total Monthly: {" "}
           {totalMonthly.toLocaleString("pt-PT", {
             style: "currency",
             currency: "EUR"

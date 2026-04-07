@@ -2,6 +2,7 @@ import { Drawer, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/m
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import { useLocation, useNavigate } from "react-router-dom";
 import sidebarMoneyBg from "../../../assets/moneypattern.jpg";
 
@@ -49,6 +50,17 @@ export default function Sidebar() {
               <RequestQuoteOutlinedIcon />
             </ListItemIcon>
             <ListItemText primary="Fixed Expenses" />
+        </ListItemButton>
+    
+        <ListItemButton
+          selected={location.pathname === "/investments-by-year"}
+          onClick={() => navigate("/investments-by-year")}
+           sx={{ mb: 1, px: 1 }}
+        >
+          <ListItemIcon>
+            <ReceiptLongOutlinedIcon />
+          </ListItemIcon>
+          <ListItemText primary="Investment Records" />
         </ListItemButton>
 
         <ListItemButton
