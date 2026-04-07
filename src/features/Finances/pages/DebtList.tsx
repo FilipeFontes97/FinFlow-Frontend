@@ -9,6 +9,7 @@ import {
   Button,
   Paper,
   TextField,
+  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -60,6 +61,8 @@ export default function DebtList() {
   const [selectedDebtName, setSelectedDebtName] = useState("");
   const [openDeleteDebt, setOpenDeleteDebt] = useState(false);
   const [debtToDelete, setDebtToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [editingSplitDebtId, setEditingSplitDebtId] = useState<string | null>(null);
+  const [localSplitValue, setLocalSplitValue] = useState<number>(1);
   const [editingNoteDebtId, setEditingNoteDebtId] = useState<string | null>(null);
   const [localNoteValue, setLocalNoteValue] = useState("");
 
@@ -136,12 +139,37 @@ export default function DebtList() {
     setLocalNoteValue(currentNote ?? "");
   }
 
-  async function saveNoteEdit(debtId: string) {
+  function startSplitEdit(debtId: string, currentSplit: PaymentPortionsValue) {
+    const resolvedValue = resolvePaymentPortions(currentSplit);
+    setEditingSplitDebtId(debtId);
+    setLocalSplitValue(Number.isFinite(resolvedValue) && resolvedValue > 0 ? resolvedValue : 1);
+  }
+
+  async function saveSplitEdit(debtId: string) {
     const debt = debts.find((d) => d.id === debtId);
     if (!debt) return;
 
     await debtService.update(debtId, {
       ...debt,
+      paymentPortions: localSplitValue,
+    });
+
+    setEditingSplitDebtId(null);
+    await loadDebts();
+  }
+
+  async function saveNoteEdit(debtId: string) {
+    const debt = debts.find((d) => d.id === debtId);
+    if (!debt) return;
+
+    const normalizedPaymentPortions = resolvePaymentPortions(debt.paymentPortions);
+
+    await debtService.update(debtId, {
+      ...debt,
+      paymentPortions:
+        Number.isFinite(normalizedPaymentPortions) && normalizedPaymentPortions > 0
+          ? normalizedPaymentPortions
+          : 1,
       notes: localNoteValue,
     });
 
@@ -315,20 +343,48 @@ useEffect(() => {
                   })}
                 </TableCell>
 
-                <TableCell sx={{ ...cellWithDivider }}>
-                  <Box sx={{ lineHeight: 1.1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {formatSplitValue(d.paymentPortions)}
-                      <Typography
-                        component="span"
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ ml: 0.75 }}
-                      >
-                        {`${d.payments?.length ?? 0} payment${(d.payments?.length ?? 0) === 1 ? "" : "s"}`}
+                <TableCell
+                  sx={{ ...editableCell, ...cellWithDivider }}
+                  onClick={() => startSplitEdit(d.id, d.paymentPortions)}
+                >
+                  {editingSplitDebtId === d.id ? (
+                    <TextField
+                      autoFocus
+                      variant="standard"
+                      select
+                      sx={editingCell}
+                      value={localSplitValue}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => setLocalSplitValue(Number(e.target.value))}
+                      onBlur={() => saveSplitEdit(d.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          e.currentTarget.blur();
+                        }
+                      }}
+                    >
+                      <MenuItem value={1}>One-time payment</MenuItem>
+                      <MenuItem value={3}>3x</MenuItem>
+                      <MenuItem value={6}>6x</MenuItem>
+                      <MenuItem value={12}>12x</MenuItem>
+                      <MenuItem value={24}>24x</MenuItem>
+                    </TextField>
+                  ) : (
+                    <Box sx={{ lineHeight: 1.1 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {formatSplitValue(d.paymentPortions)}
+                        <Typography
+                          component="span"
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ ml: 0.75 }}
+                        >
+                          {`${d.payments?.length ?? 0} payment${(d.payments?.length ?? 0) === 1 ? "" : "s"}`}
+                        </Typography>
                       </Typography>
-                    </Typography>
-                  </Box>
+                    </Box>
+                  )}
                 </TableCell>
 
                 <TableCell
