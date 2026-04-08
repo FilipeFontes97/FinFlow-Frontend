@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Box,
@@ -7,14 +7,9 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { financialAccountService } from "../services/financialAccountService";
-import { debtService } from "../services/debtService";
-import { fixedExpensesService } from "../services/fixedExpensesService";
-import { investmentReportService } from "../services/investmentReportingService";
-import type { FinancialAccountListResponse } from "../types/FinancialAccount";
-import type { DebtResponse } from "../types/Debt";
-import type { FixedExpenseResponse } from "../types/FixedExpenses";
-import type { InvestmentSummary } from "../types/Investments";
+
+import { dashboardService } from "../services/dashboardService";
+import type { DashboardOverview } from "../services/dashboardService";
 
 const pageTitleSx = {
   margin: 0,
@@ -42,10 +37,7 @@ function money(value: number) {
 }
 
 export default function HomeDashboard() {
-  const [accounts, setAccounts] = useState<FinancialAccountListResponse | null>(null);
-  const [debts, setDebts] = useState<DebtResponse[]>([]);
-  const [fixedExpenses, setFixedExpenses] = useState<FixedExpenseResponse[]>([]);
-  const [investmentsByYear, setInvestmentsByYear] = useState<InvestmentSummary | null>(null);
+  const [dashboard, setDashboard] = useState<DashboardOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -53,17 +45,8 @@ export default function HomeDashboard() {
     const loadDashboard = async () => {
       try {
         setLoading(true);
-        const [accountsData, debtsData, fixedData, investmentsData] = await Promise.all([
-          financialAccountService.getAll(),
-          debtService.getAll(),
-          fixedExpensesService.getAll(),
-          investmentReportService.getByYear(),
-        ]);
-
-        setAccounts(accountsData);
-        setDebts(debtsData);
-        setFixedExpenses(fixedData);
-        setInvestmentsByYear(investmentsData);
+        const data = await dashboardService.getOverview();
+        setDashboard(data);
         setError("");
       } catch {
         setError("Could not load dashboard data right now.");
@@ -75,44 +58,15 @@ export default function HomeDashboard() {
     loadDashboard();
   }, []);
 
-  const totalAssets = accounts?.totalCurrentValue ?? 0;
-  const totalDebt = debts.reduce((sum, d) => sum + d.remainingAmount, 0);
-  const totalMonthlyFixed = fixedExpenses.reduce((sum, e) => sum + e.monthlyAmount, 0);
-  const netPosition = totalAssets - totalDebt;
-
-  const accountTypeBars = useMemo(() => {
-    const grouped = new Map<string, number>();
-    for (const acc of accounts?.financialAccountList ?? []) {
-      const key = acc.type || "Other";
-      const value = acc.currentValue ?? acc.valueInvested ?? 0;
-      grouped.set(key, (grouped.get(key) ?? 0) + value);
-    }
-
-    const rows = Array.from(grouped.entries())
-      .map(([label, value]) => ({ label, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 6);
-
-    const total = rows.reduce((sum, r) => sum + r.value, 0) || 1;
-    const max = Math.max(...rows.map((r) => r.value), 1);
-    return rows.map((row) => ({
-      ...row,
-      width: (row.value / max) * 100,
-      percent: (row.value / total) * 100,
-    }));
-  }, [accounts]);
-
-  const yearBars = useMemo(() => {
-    const rows = [...(investmentsByYear?.byYear ?? [])].sort((a, b) => a.year - b.year);
-    const max = Math.max(...rows.map((r) => r.totalInvested), 1);
-    return rows.map((row) => ({
-      ...row,
-      height: Math.max(14, (row.totalInvested / max) * 100),
-    }));
-  }, [investmentsByYear]);
+  const assets = dashboard?.assets ?? 0;
+  const debts = dashboard?.debts ?? 0;
+  const monthlyFixed = dashboard?.monthlyFixedExpenses ?? 0;
+  const allTimeInvested = dashboard?.allTimeInvested ?? 0;
+  const netPosition = dashboard?.netPosition ?? 0;
 
   return (
     <Box sx={{ width: "100%" }}>
+      {/* HEADER */}
       <Box
         sx={{
           display: "flex",
@@ -150,8 +104,9 @@ export default function HomeDashboard() {
 
       {!loading && error && <Alert severity="warning">{error}</Alert>}
 
-      {!loading && !error && (
+      {!loading && !error && dashboard && (
         <Stack spacing={2}>
+          {/* KPI CARDS */}
           <Box
             sx={{
               display: "grid",
@@ -160,23 +115,43 @@ export default function HomeDashboard() {
             }}
           >
             <Paper sx={{ p: 2 }}>
-              <Typography variant="caption" color="text.secondary">Assets</Typography>
-              <Typography variant="h6" fontWeight={700}>{money(totalAssets)}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Assets
+              </Typography>
+              <Typography variant="h6" fontWeight={700}>
+                {money(assets)}
+              </Typography>
             </Paper>
+
             <Paper sx={{ p: 2 }}>
-              <Typography variant="caption" color="text.secondary">Debt</Typography>
-              <Typography variant="h6" fontWeight={700} color="error.main">{money(totalDebt)}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Debt
+              </Typography>
+              <Typography variant="h6" fontWeight={700} color="error.main">
+                {money(debts)}
+              </Typography>
             </Paper>
+
             <Paper sx={{ p: 2 }}>
-              <Typography variant="caption" color="text.secondary">Monthly Fixed Expenses</Typography>
-              <Typography variant="h6" fontWeight={700}>{money(totalMonthlyFixed)}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Monthly Fixed Expenses
+              </Typography>
+              <Typography variant="h6" fontWeight={700}>
+                {money(monthlyFixed)}
+              </Typography>
             </Paper>
+
             <Paper sx={{ p: 2 }}>
-              <Typography variant="caption" color="text.secondary">All-Time Invested</Typography>
-              <Typography variant="h6" fontWeight={700}>{money(investmentsByYear?.totalInvested ?? 0)}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                All-Time Invested
+              </Typography>
+              <Typography variant="h6" fontWeight={700}>
+                {money(allTimeInvested)}
+              </Typography>
             </Paper>
           </Box>
 
+          {/* MAIN SECTION */}
           <Box
             sx={{
               display: "grid",
@@ -184,32 +159,58 @@ export default function HomeDashboard() {
               gap: 2,
             }}
           >
+            {/* ASSET ALLOCATION */}
             <Paper sx={{ p: 2 }}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>
                 Asset Allocation by Account Type
               </Typography>
+
               <Stack spacing={1.25}>
-                {accountTypeBars.length === 0 && (
-                  <Typography color="text.secondary">No account data yet.</Typography>
+                {dashboard.assetAllocation.length === 0 && (
+                  <Typography color="text.secondary">
+                    No account data yet.
+                  </Typography>
                 )}
-                {accountTypeBars.map((bar) => (
-                  <Box key={bar.label}>
-                    <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
-                      <Typography variant="body2">{bar.label}</Typography>
+
+                {dashboard.assetAllocation.map((bar) => (
+                  <Box key={bar.accountType}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      sx={{ mb: 0.5 }}
+                    >
+                      <Typography variant="body2">
+                        {bar.accountType}
+                      </Typography>
+
                       <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography variant="body2" color="text.secondary">
-                          {bar.percent.toFixed(1)}%
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                        >
+                          {bar.percentage.toFixed(1)}%
                         </Typography>
-                        <Typography variant="body2" fontWeight={600}>{money(bar.value)}</Typography>
+
+                        <Typography variant="body2" fontWeight={600}>
+                          {money(bar.amount)}
+                        </Typography>
                       </Stack>
                     </Stack>
-                    <Box sx={{ height: 10, borderRadius: 10, backgroundColor: "#e2e8f0" }}>
+
+                    <Box
+                      sx={{
+                        height: 10,
+                        borderRadius: 10,
+                        backgroundColor: "#e2e8f0",
+                      }}
+                    >
                       <Box
                         sx={{
                           height: "100%",
-                          width: `${bar.width}%`,
+                          width: `${bar.percentage}%`,
                           borderRadius: 10,
-                          background: "linear-gradient(90deg, #16a34a, #22c55e)",
+                          background:
+                            "linear-gradient(90deg, #16a34a, #22c55e)",
                         }}
                       />
                     </Box>
@@ -218,16 +219,19 @@ export default function HomeDashboard() {
               </Stack>
             </Paper>
 
+            {/* INVESTMENTS BY YEAR */}
             <Paper sx={{ p: 2 }}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>
                 Investments by Year
               </Typography>
 
-              {yearBars.length === 0 && (
-                <Typography color="text.secondary">No investment records yet.</Typography>
+              {dashboard.investmentsByYear.length === 0 && (
+                <Typography color="text.secondary">
+                  No investment records yet.
+                </Typography>
               )}
 
-              {yearBars.length > 0 && (
+              {dashboard.investmentsByYear.length > 0 && (
                 <Box
                   sx={{
                     height: 190,
@@ -238,7 +242,7 @@ export default function HomeDashboard() {
                     pt: 1,
                   }}
                 >
-                  {yearBars.map((row) => (
+                  {dashboard.investmentsByYear.map((row) => (
                     <Box
                       key={row.year}
                       sx={{
@@ -251,13 +255,18 @@ export default function HomeDashboard() {
                         sx={{
                           mx: "auto",
                           width: "70%",
-                          height: `${row.height}%`,
+                          height: `${row.totalInvested /
+                            (dashboard.allTimeInvested || 1) * 100}%`,
                           minHeight: 14,
                           borderRadius: "6px 6px 0 0",
-                          background: "linear-gradient(180deg, #0ea5e9, #0284c7)",
+                          background:
+                            "linear-gradient(180deg, #0ea5e9, #0284c7)",
                         }}
                       />
-                      <Typography variant="caption" sx={{ mt: 0.5, display: "block" }}>
+                      <Typography
+                        variant="caption"
+                        sx={{ mt: 0.5, display: "block" }}
+                      >
                         {row.year}
                       </Typography>
                     </Box>
