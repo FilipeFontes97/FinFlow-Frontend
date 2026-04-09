@@ -189,7 +189,7 @@ export default function HomeDashboard() {
 
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Typography variant="body2" color="text.secondary">
-                        {bar.percentage.toFixed(1)}%
+                        {bar.percentage.toFixed(2)}%
                       </Typography>
 
                       <Typography variant="body2" fontWeight={600}>
