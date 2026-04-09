@@ -14,6 +14,7 @@ interface Props {
   signals: DashboardSignal[];
   emergencyFundCurrent?: number;
   emergencyFundGoal?: number;
+  monthsCovered?: number;
 }
 
 function money(value: number) {
@@ -23,7 +24,7 @@ function money(value: number) {
   });
 }
 
-export default function DashboardSignals({ signals, emergencyFundCurrent, emergencyFundGoal }: Props) {
+export default function DashboardSignals({ signals, emergencyFundCurrent, emergencyFundGoal, monthsCovered }: Props) {
   if ((!signals || signals.length === 0) && !emergencyFundGoal) return null;
 
   const progress = emergencyFundGoal && emergencyFundGoal > 0 
@@ -126,6 +127,11 @@ export default function DashboardSignals({ signals, emergencyFundCurrent, emerge
               {money(emergencyFundGoal)}
             </Typography>
           </Box>
+          {monthsCovered !== undefined && (
+            <Typography variant="caption" sx={{ mt: 0.65, display: "block", color: "#334155", fontWeight: 600 }}>
+              Covers {monthsCovered.toFixed(1)} months
+            </Typography>
+          )}
         </Box>
       )}
     </Box>

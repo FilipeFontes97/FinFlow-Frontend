@@ -10,6 +10,7 @@ import {
   Stack
 } from "@mui/material";
 import { debtService } from "../services/debtService";
+import { isValidDecimalInput, parseLocaleDecimal } from "../utils/numberInput";
 import {
   dialogActionsSx,
   dialogTitleSx,
@@ -34,7 +35,7 @@ export default function AddDebtModal({ open, onClose, onCreated }: Props) {
 
     await debtService.create({
       itemName,
-      totalAmount: Number(totalAmount),
+      totalAmount: parseLocaleDecimal(totalAmount),
       paymentPortions,
       notes
     });
@@ -63,10 +64,14 @@ export default function AddDebtModal({ open, onClose, onCreated }: Props) {
 
           <TextField
             label="Total Amount (€)"
-            type="number"
+            type="text"
+            inputMode="decimal"
             fullWidth
             value={totalAmount}
-            onChange={(e) => setTotalAmount(e.target.value)}
+            onChange={(e) => {
+              if (!isValidDecimalInput(e.target.value)) return;
+              setTotalAmount(e.target.value);
+            }}
           />
 
           <TextField

@@ -13,6 +13,7 @@ import type { DashboardOverview } from "../services/dashboardService";
 import { debtService } from "../services/debtService";
 import type { DebtResponse } from "../types/Debt";
 import { settingsService } from "../services/settingsService";
+import { financialProjectionService } from "../services/financialProjectionService";
 import DashboardSignals from "../components/DashboardSignals";
 import { financePalette, pageHeaderSx, pagePanelCardSx } from "../styles";
 
@@ -51,6 +52,8 @@ export default function HomeDashboard() {
   const [dashboard, setDashboard] = useState<DashboardOverview | null>(null);
   const [debtsList, setDebtsList] = useState<DebtResponse[]>([]);
   const [emergencyFundGoal, setEmergencyFundGoal] = useState<number>(0);
+  const [emergencyFundAmount, setEmergencyFundAmount] = useState<number>(0);
+  const [monthsCovered, setMonthsCovered] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -58,14 +61,17 @@ export default function HomeDashboard() {
     const loadDashboard = async () => {
       try {
         setLoading(true);
-        const [dashboardData, debtsData, settingsData] = await Promise.all([
+        const [dashboardData, debtsData, settingsData, projectionData] = await Promise.all([
           dashboardService.getOverview(),
           debtService.getAll(),
           settingsService.get(),
+          financialProjectionService.getEmergencyFundProjection(),
         ]);
         setDashboard(dashboardData);
         setDebtsList(debtsData);
         setEmergencyFundGoal(settingsData.emergencyFundTarget ?? 0);
+        setEmergencyFundAmount(projectionData.emergencyFundAmount ?? 0);
+        setMonthsCovered(projectionData.monthsCovered ?? 0);
         setError("");
       } catch {
         setError("Could not load dashboard data right now.");
@@ -100,7 +106,7 @@ export default function HomeDashboard() {
   const closeToPaidOffDebts = debtsList.filter((debt) => {
     if (debt.remainingAmount <= 0.009) return false;
     if (debt.totalAmount <= 0) return false;
-    return debt.remainingAmount / debt.totalAmount <= 0.15;
+    return debt.remainingAmount / debt.totalAmount <= 0.3334;
   });
 
   const now = new Date();
@@ -137,10 +143,6 @@ export default function HomeDashboard() {
     ...dashboard.investmentsByYear.map((row) => row.totalInvested),
     1
   );
-
-  const emergencyFundCurrent = dashboard.assetAllocation.find(
-    (allocation) => allocation.accountType === "EmergencyFund"
-  )?.amount ?? 0;
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -438,8 +440,9 @@ export default function HomeDashboard() {
         {/* ✅ DASHBOARD SIGNALS */}
         <DashboardSignals 
           signals={dashboard.signals ?? []} 
-          emergencyFundCurrent={emergencyFundCurrent}
+          emergencyFundCurrent={emergencyFundAmount}
           emergencyFundGoal={emergencyFundGoal}
+          monthsCovered={monthsCovered}
         />
       </Stack>
     </Box>

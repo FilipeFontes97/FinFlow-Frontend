@@ -8,6 +8,7 @@ import {
   TextField
 } from "@mui/material";
 import { debtService } from "../services/debtService";
+import { isValidDecimalInput, parseLocaleDecimal } from "../utils/numberInput";
 import {
   dialogActionsSx,
   dialogTitleSx,
@@ -33,7 +34,7 @@ export default function AddPaymentModal({
   async function handleAdd() {
     if (!debtId || !amount) return;
 
-    await debtService.addPayment(debtId, Number(amount));
+    await debtService.addPayment(debtId, parseLocaleDecimal(amount));
 
     onCreated();
     onClose();
@@ -47,12 +48,16 @@ export default function AddPaymentModal({
       <DialogContent>
         <TextField
           label="Amount (€)"
-          type="number"
+          type="text"
+          inputMode="decimal"
           fullWidth
           autoFocus
           margin="dense"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={(e) => {
+            if (!isValidDecimalInput(e.target.value)) return;
+            setAmount(e.target.value);
+          }}
         />
       </DialogContent>
 

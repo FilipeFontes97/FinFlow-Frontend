@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { fixedExpensesService } from "../services/fixedExpensesService";
 import type { CreateFixedExpenseRequest } from "../types/FixedExpenses";
+import { isValidDecimalInput, parseLocaleDecimal } from "../utils/numberInput";
 import {
   dialogActionsSx,
   dialogTitleSx,
@@ -66,7 +67,7 @@ export default function AddFixedExpenseModal({ open, onClose, onCreated }: Props
     const payload: CreateFixedExpenseRequest = {
       category,
       description: description.trim() ? description.trim() : null,
-      monthlyAmount: Number(monthlyAmount),
+      monthlyAmount: parseLocaleDecimal(monthlyAmount),
       paymentDay: paymentDay ? Number(paymentDay) : null,
       notes: notes.trim() ? notes.trim() : null,
     };
@@ -113,10 +114,14 @@ export default function AddFixedExpenseModal({ open, onClose, onCreated }: Props
 
           <TextField
             label="Monthly Amount (€)"
-            type="number"
+            type="text"
+            inputMode="decimal"
             fullWidth
             value={monthlyAmount}
-            onChange={(e) => setMonthlyAmount(e.target.value)}
+            onChange={(e) => {
+              if (!isValidDecimalInput(e.target.value)) return;
+              setMonthlyAmount(e.target.value);
+            }}
           />
 
           <TextField

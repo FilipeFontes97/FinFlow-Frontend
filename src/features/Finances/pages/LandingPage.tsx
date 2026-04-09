@@ -129,7 +129,7 @@ export default function LandingPage() {
       </Box>
 
       <Divider sx={{ mb: 4 }}>
-        <Typography variant="caption" color="#0f0f0f" fontWeight={600} letterSpacing="0.08em" textTransform="uppercase">
+        <Typography variant="caption" color="#000000" fontWeight={600} letterSpacing="0.08em" textTransform="uppercase">
           What you can do
         </Typography>
       </Divider>

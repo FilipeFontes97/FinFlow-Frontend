@@ -9,6 +9,7 @@ import {
   Stack
 } from "@mui/material";
 import { investmentService } from "../services/investmentService";
+import { isValidDecimalInput, parseLocaleDecimal } from "../utils/numberInput";
 import {
   dialogActionsSx,
   dialogTitleSx,
@@ -37,9 +38,9 @@ export default function AddInvestmentModal({
   async function handleAdd() {
     if (!amount) return;
 
-    await investmentService.addInvestment({
+        await investmentService.addInvestment({
       financialAccountId,
-      amount: Number(amount),
+          amount: parseLocaleDecimal(amount),
       investmentDate
     });
 
@@ -56,11 +57,15 @@ export default function AddInvestmentModal({
         <Stack spacing={2} mt={1}>
           <TextField
             label="Amount (€)"
-            type="number"
+            type="text"
+            inputMode="decimal"
             fullWidth
             autoFocus
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              if (!isValidDecimalInput(e.target.value)) return;
+              setAmount(e.target.value);
+            }}
           />
 
           <TextField
