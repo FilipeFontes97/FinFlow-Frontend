@@ -2,7 +2,9 @@ import http from "../../../api/http";
 
 export interface UserSettings {
   income: number;
+  name: string;
   fixedExpensesThresholdPercent: number;
+  emergencyFundTarget: number;
 }
 
 export const settingsService = {

@@ -12,6 +12,7 @@ import { dashboardService } from "../services/dashboardService";
 import type { DashboardOverview } from "../services/dashboardService";
 import { debtService } from "../services/debtService";
 import type { DebtResponse } from "../types/Debt";
+import { settingsService } from "../services/settingsService";
 import DashboardSignals from "../components/DashboardSignals";
 import { financePalette, pageHeaderSx, pagePanelCardSx } from "../styles";
 
@@ -33,6 +34,12 @@ const summaryBoxSx = {
   whiteSpace: "nowrap",
 };
 
+const dashboardSectionSx = {
+  ...pagePanelCardSx,
+  backgroundColor: "rgba(248, 250, 252, 0.65)",
+  backdropFilter: "blur(2px)",
+};
+
 function money(value: number) {
   return value.toLocaleString("pt-PT", {
     style: "currency",
@@ -43,6 +50,7 @@ function money(value: number) {
 export default function HomeDashboard() {
   const [dashboard, setDashboard] = useState<DashboardOverview | null>(null);
   const [debtsList, setDebtsList] = useState<DebtResponse[]>([]);
+  const [emergencyFundGoal, setEmergencyFundGoal] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -50,12 +58,14 @@ export default function HomeDashboard() {
     const loadDashboard = async () => {
       try {
         setLoading(true);
-        const [dashboardData, debtsData] = await Promise.all([
+        const [dashboardData, debtsData, settingsData] = await Promise.all([
           dashboardService.getOverview(),
           debtService.getAll(),
+          settingsService.get(),
         ]);
         setDashboard(dashboardData);
         setDebtsList(debtsData);
+        setEmergencyFundGoal(settingsData.emergencyFundTarget ?? 0);
         setError("");
       } catch {
         setError("Could not load dashboard data right now.");
@@ -128,6 +138,10 @@ export default function HomeDashboard() {
     1
   );
 
+  const emergencyFundCurrent = dashboard.assetAllocation.find(
+    (allocation) => allocation.accountType === "EmergencyFund"
+  )?.amount ?? 0;
+
   return (
     <Box sx={{ width: "100%" }}>
       {/* HEADER */}
@@ -155,7 +169,7 @@ export default function HomeDashboard() {
             gap: 2,
           }}
         >
-          <Paper sx={pagePanelCardSx}>
+          <Paper sx={dashboardSectionSx}>
             <Typography variant="caption" color="text.secondary">
               Net Worth
             </Typography>
@@ -164,7 +178,7 @@ export default function HomeDashboard() {
             </Typography>
           </Paper>
 
-          <Paper sx={pagePanelCardSx}>
+          <Paper sx={dashboardSectionSx}>
             <Typography variant="caption" color="text.secondary">
               Debt
             </Typography>
@@ -173,7 +187,7 @@ export default function HomeDashboard() {
             </Typography>
           </Paper>
 
-          <Paper sx={pagePanelCardSx}>
+          <Paper sx={dashboardSectionSx}>
             <Typography variant="caption" color="text.secondary">
               Monthly Fixed Expenses
             </Typography>
@@ -182,7 +196,7 @@ export default function HomeDashboard() {
             </Typography>
           </Paper>
 
-          <Paper sx={pagePanelCardSx}>
+          <Paper sx={dashboardSectionSx}>
             <Typography variant="caption" color="text.secondary">
               All-Time Invested
             </Typography>
@@ -201,7 +215,7 @@ export default function HomeDashboard() {
           }}
         >
           {/* ASSET ALLOCATION */}
-          <Paper sx={pagePanelCardSx}>
+          <Paper sx={dashboardSectionSx}>
             <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>
               Asset Allocation by Account Type
             </Typography>
@@ -252,7 +266,7 @@ export default function HomeDashboard() {
           </Paper>
 
           {/* INVESTMENTS BY YEAR */}
-          <Paper sx={pagePanelCardSx}>
+          <Paper sx={dashboardSectionSx}>
             <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>
               Investments by Year
             </Typography>
@@ -327,7 +341,7 @@ export default function HomeDashboard() {
         </Box>
 
          {/* DEBT PROGRESS */}
-        <Paper sx={pagePanelCardSx}>
+        <Paper sx={dashboardSectionSx}>
           <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>
             Debt Progress
           </Typography>
@@ -422,7 +436,11 @@ export default function HomeDashboard() {
         </Paper>
 
         {/* ✅ DASHBOARD SIGNALS */}
-        <DashboardSignals signals={dashboard.signals ?? []} />
+        <DashboardSignals 
+          signals={dashboard.signals ?? []} 
+          emergencyFundCurrent={emergencyFundCurrent}
+          emergencyFundGoal={emergencyFundGoal}
+        />
       </Stack>
     </Box>
   );
