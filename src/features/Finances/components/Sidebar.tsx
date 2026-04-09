@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Collapse, Drawer, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { Box, Collapse, Drawer, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
@@ -11,6 +11,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useLocation, useNavigate } from "react-router-dom";
 import sidebarMoneyBg from "../../../assets/moneypattern.jpg";
+import finflowLogo from "../../../assets/finflowlogo.png";
 
 const drawerWidth = 220;
 
@@ -63,6 +64,17 @@ export default function Sidebar() {
         },
       }}
     >
+      <Box
+        onClick={() => navigate("/")}
+        sx={{
+          p: 1.5,
+          textAlign: "center",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.6)",
+          cursor: "pointer",
+        }}
+      >
+        <img src={finflowLogo} alt="FinFlow Logo" style={{ height: 50, width: "auto" }} />
+      </Box>
       <List sx={{ mt: 0, p: 0 }}>
         <ListItemButton
           selected={location.pathname === "/"}
