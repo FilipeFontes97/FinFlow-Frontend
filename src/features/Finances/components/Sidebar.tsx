@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Box, Collapse, Drawer, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
-import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useLocation, useNavigate } from "react-router-dom";
-import sidebarMoneyBg from "../../../assets/moneypattern.jpg";
+import sidebarMoneyBg from "../../../assets/Designer.png";
 import finflowLogo from "../../../assets/finflowlogo.png";
 
 const drawerWidth = 220;
@@ -23,16 +23,17 @@ function navItemSx(selected: boolean, nested = false) {
     py: 0.6,
     borderRadius: "8px",
     mx: 0.8,
-    color: selected ? "#0f172a" : "#334155",
-    backgroundColor: selected ? "rgba(8, 168, 16, 0.14)" : "transparent",
-    borderLeft: selected ? "3px solid #08a810" : "3px solid transparent",
+    color: selected ? "#052e16" : "#334155",
+    backgroundColor: selected ? "rgba(220, 252, 231, 0.92)" : "transparent",
+    borderLeft: selected ? "3px solid #16a34a" : "3px solid transparent",
+    boxShadow: selected ? "0 1px 4px rgba(15, 23, 42, 0.14)" : "none",
     transition: "all 0.16s ease",
     "&:hover": {
-      backgroundColor: selected ? "rgba(8, 168, 16, 0.18)" : "rgba(15, 23, 42, 0.06)",
+      backgroundColor: selected ? "rgba(220, 252, 231, 1)" : "rgba(15, 23, 42, 0.1)",
     },
     "& .MuiListItemIcon-root": {
       minWidth: 34,
-      color: selected ? "#08a810" : "#475569",
+      color: selected ? "#15803d" : "#334155",
     },
     "& .MuiListItemText-primary": {
       fontWeight: selected ? 700 : 600,
@@ -83,8 +84,8 @@ export default function Sidebar() {
         "& .MuiDrawer-paper": {
           width: drawerWidth,
           boxSizing: "border-box",
-          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.86)), url(${sidebarMoneyBg})`,
-          borderRight: "1px solid rgba(255, 255, 255, 0.86)",
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.39)), url(${sidebarMoneyBg})`,
+          borderRight: "none",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -101,18 +102,18 @@ export default function Sidebar() {
           cursor: "pointer",
         }}
       >
-        <img src={finflowLogo} alt="FinFlow Logo" style={{ height: 66, width: "auto" }} />
+        <img src={finflowLogo} alt="FinFlow Logo" style={{ height: 56, width: "auto" }} />
       </Box>
       <List sx={{ mt: 0, p: 0 }}>
         <ListItemButton
-          selected={location.pathname === "/"}
-          onClick={() => navigate("/")}
-          sx={navItemSx(location.pathname === "/")}
+          selected={location.pathname === "/dashboard"}
+          onClick={() => navigate("/dashboard")}
+          sx={navItemSx(location.pathname === "/dashboard")}
         >
           <ListItemIcon>
-            <HomeOutlinedIcon />
+            <DashboardOutlinedIcon />
           </ListItemIcon>
-          <ListItemText primary="Home" />
+          <ListItemText primary="Dashboard" />
         </ListItemButton>
 
         <ListItemButton
@@ -162,13 +163,13 @@ export default function Sidebar() {
               <ListItemText primary="Debts" />
             </ListItemButton>
 
-                        <ListItemButton
+            <ListItemButton
               selected={location.pathname === "/investments-by-year"}
               onClick={() => navigateToManagement("/investments-by-year")}
               sx={navItemSx(location.pathname === "/investments-by-year", true)}
             >
               <ListItemIcon>
-                <ReceiptLongOutlinedIcon />
+                <TrendingUpOutlinedIcon />
               </ListItemIcon>
               <ListItemText primary="Investment Records" />
             </ListItemButton>

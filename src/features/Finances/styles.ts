@@ -56,7 +56,7 @@ export const editableCell = {
 };
 
 export const editingCell = {
-  backgroundColor: "#fff7cc",
+  backgroundColor: "rgba(8, 168, 16, 0.14)",
   padding: "0 !important",
   margin: 0,
 };

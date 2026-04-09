@@ -77,6 +77,28 @@ function formatFixedExpenseCategory(category: string | number): string {
   return category;
 }
 
+function resolveCategoryToOptionValue(category: string | number | null | undefined): string {
+  if (category == null) return "";
+
+  if (typeof category === "number" && Number.isFinite(category)) {
+    return String(category);
+  }
+
+  const raw = String(category).trim();
+  if (!raw) return "";
+
+  const numericCategory = Number(raw);
+  if (Number.isFinite(numericCategory)) {
+    return String(numericCategory);
+  }
+
+  const matchedEntry = Object.entries(fixedExpenseCategoryLabels).find(
+    ([, label]) => label.toLowerCase() === raw.toLowerCase()
+  );
+
+  return matchedEntry ? matchedEntry[0] : raw;
+}
+
 export default function FixedExpensesList() {
   const [expenses, setExpenses] = useState<FixedExpenseResponse[]>([]);
   const [openAddExpense, setOpenAddExpense] = useState(false);
@@ -111,7 +133,11 @@ export default function FixedExpensesList() {
     initialValue: string | number | null | undefined
   ) {
     setEditing({ id, field });
-    setLocalEditValue(initialValue != null ? String(initialValue) : "");
+    if (field === "category") {
+      setLocalEditValue(resolveCategoryToOptionValue(initialValue));
+    } else {
+      setLocalEditValue(initialValue != null ? String(initialValue) : "");
+    }
     setPaymentDayInlineError("");
   }
 

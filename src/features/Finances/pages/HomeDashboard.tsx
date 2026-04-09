@@ -10,6 +10,8 @@ import {
 
 import { dashboardService } from "../services/dashboardService";
 import type { DashboardOverview } from "../services/dashboardService";
+import { debtService } from "../services/debtService";
+import type { DebtResponse } from "../types/Debt";
 import DashboardSignals from "../components/DashboardSignals";
 import { financePalette, pageHeaderSx, pagePanelCardSx } from "../styles";
 
@@ -40,6 +42,7 @@ function money(value: number) {
 
 export default function HomeDashboard() {
   const [dashboard, setDashboard] = useState<DashboardOverview | null>(null);
+  const [debtsList, setDebtsList] = useState<DebtResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -47,8 +50,12 @@ export default function HomeDashboard() {
     const loadDashboard = async () => {
       try {
         setLoading(true);
-        const data = await dashboardService.getOverview();
-        setDashboard(data);
+        const [dashboardData, debtsData] = await Promise.all([
+          dashboardService.getOverview(),
+          debtService.getAll(),
+        ]);
+        setDashboard(dashboardData);
+        setDebtsList(debtsData);
         setError("");
       } catch {
         setError("Could not load dashboard data right now.");
@@ -80,6 +87,42 @@ export default function HomeDashboard() {
   const monthlyFixed = dashboard.monthlyFixedExpenses;
   const allTimeInvested = dashboard.allTimeInvested;
   const netPosition = dashboard.netPosition;
+  const closeToPaidOffDebts = debtsList.filter((debt) => {
+    if (debt.remainingAmount <= 0.009) return false;
+    if (debt.totalAmount <= 0) return false;
+    return debt.remainingAmount / debt.totalAmount <= 0.15;
+  });
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+
+  const debtsPaidThisMonth = debtsList.filter((debt) => {
+    if (debt.remainingAmount > 0.009) return false;
+    if (!debt.lastPaymentDate) return false;
+
+    const lastPayment = new Date(debt.lastPaymentDate);
+    return (
+      !Number.isNaN(lastPayment.getTime()) &&
+      lastPayment.getFullYear() === currentYear &&
+      lastPayment.getMonth() === currentMonth
+    );
+  });
+
+  const totalDebtPaymentsThisMonth = debtsList.reduce((sum, debt) => {
+    const paidInMonth = (debt.payments ?? []).reduce((paymentsSum, payment) => {
+      const paymentDate = new Date(payment.date);
+      const isCurrentMonth =
+        !Number.isNaN(paymentDate.getTime()) &&
+        paymentDate.getFullYear() === currentYear &&
+        paymentDate.getMonth() === currentMonth;
+
+      return isCurrentMonth ? paymentsSum + payment.amount : paymentsSum;
+    }, 0);
+
+    return sum + paidInMonth;
+  }, 0);
+
   const maxYearlyInvestment = Math.max(
     ...dashboard.investmentsByYear.map((row) => row.totalInvested),
     1
@@ -282,6 +325,101 @@ export default function HomeDashboard() {
             </Box>
           </Paper>
         </Box>
+
+         {/* DEBT PROGRESS */}
+        <Paper sx={pagePanelCardSx}>
+          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>
+            Debt Progress
+          </Typography>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+              gap: 1.25,
+            }}
+          >
+            <Box
+              sx={{
+                p: 1,
+                borderRadius: "8px",
+                border: `1px solid ${financePalette.neutralBorder}`,
+                backgroundColor: financePalette.neutralSurface,
+              }}
+            >
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                Debt close to paid off
+              </Typography>
+
+              <Box sx={{ mt: 0.5, maxHeight: 76, overflowY: "auto", pr: 0.25 }}>
+                {closeToPaidOffDebts.length === 0 ? (
+                  <Typography variant="caption" color="text.secondary">
+                    None
+                  </Typography>
+                ) : (
+                  closeToPaidOffDebts.slice(0, 3).map((debt) => (
+                    <Typography key={debt.id} variant="caption" sx={{ color: "#334155", display: "block", lineHeight: 1.35 }}>
+                      • {debt.itemName}
+                    </Typography>
+                  ))
+                )}
+                {closeToPaidOffDebts.length > 3 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, display: "block" }}>
+                    +{closeToPaidOffDebts.length - 3} more
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                p: 1,
+                borderRadius: "8px",
+                border: `1px solid ${financePalette.neutralBorder}`,
+                backgroundColor: financePalette.neutralSurface,
+              }}
+            >
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                Debts Fully Paid This Month
+              </Typography>
+
+              <Box sx={{ mt: 0.5, maxHeight: 76, overflowY: "auto", pr: 0.25 }}>
+                {debtsPaidThisMonth.length === 0 ? (
+                  <Typography variant="caption" color="text.secondary">
+                    None
+                  </Typography>
+                ) : (
+                  debtsPaidThisMonth.slice(0, 3).map((debt) => (
+                    <Typography key={debt.id} variant="caption" sx={{ color: "#334155", display: "block", lineHeight: 1.35 }}>
+                      • {debt.itemName}
+                    </Typography>
+                  ))
+                )}
+                {debtsPaidThisMonth.length > 3 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, display: "block" }}>
+                    +{debtsPaidThisMonth.length - 3} more
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                p: 1,
+                borderRadius: "8px",
+                border: `1px solid ${financePalette.neutralBorder}`,
+                backgroundColor: financePalette.neutralSurface,
+              }}
+            >
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                Amount paid in debt this month
+              </Typography>
+              <Typography variant="caption" sx={{ mt: 0.5, display: "block", color: "#334155" }}>
+                {money(totalDebtPaymentsThisMonth)}
+              </Typography>
+            </Box>
+          </Box>
+        </Paper>
 
         {/* ✅ DASHBOARD SIGNALS */}
         <DashboardSignals signals={dashboard.signals ?? []} />
