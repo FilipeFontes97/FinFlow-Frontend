@@ -6,6 +6,7 @@ import AppLayout from "./layout/AppLayout";
 import InvestmentByYear from "./features/Finances/pages/InvestmentByYear";
 import HomeDashboard from "./features/Finances/pages/HomeDashboard";
 import SettingsPage from "./features/Finances/pages/SettingsPage";
+import LandingPage from "./features/Finances/pages/LandingPage";
 
 export default function App() {
   return (
@@ -13,7 +14,8 @@ export default function App() {
       <Routes>
         {/* Layout route */}
         <Route element={<AppLayout />}>
-          <Route path="/" element={<HomeDashboard />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/dashboard" element={<HomeDashboard />} />
           <Route path="/accounts" element={<FinancialAccountList />} />
            <Route path="/fixed-expenses" element={<FixedExpensesList />} />
           <Route path="/debts" element={<DebtList />} />

@@ -11,6 +11,7 @@ import {
 
 import { settingsService, type UserSettings } from "../services/settingsService";
 import { modalPrimaryButtonSx } from "../components/modalStyles";
+import { financePalette, pageHeaderSx, pagePanelCardSx } from "../styles";
 
 const pageTitleSx = {
   margin: 0,
@@ -24,31 +25,28 @@ const pageTitleSx = {
 const summaryBoxSx = {
   padding: "0.6rem 1rem",
   borderRadius: "6px",
-  backgroundColor: "#f5f5f5",
+  backgroundColor: financePalette.neutralSoft,
   fontSize: "1.1rem",
   fontWeight: 600,
   whiteSpace: "nowrap",
 };
 
 const settingsCardSx = {
+  ...pagePanelCardSx,
   p: 0,
-  border: "1px solid #e5e7eb",
-  borderRadius: "8px",
   overflow: "hidden",
-  boxShadow: "none",
-  backgroundColor: "#ffffff",
 };
 
 const settingsCardHeaderSx = {
   px: 2,
   py: 1.2,
-  backgroundColor: "#08a810",
-  borderBottom: "1px solid #059669",
+  backgroundColor: financePalette.primary,
+  borderBottom: `1px solid ${financePalette.primaryDark}`,
 };
 
 const settingsCardBodySx = {
   p: 2,
-  backgroundColor: "#f8fafc",
+  backgroundColor: financePalette.neutralSurface,
 };
 
 const inputSx = {
@@ -104,20 +102,7 @@ export default function SettingsPage() {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-          pb: 1,
-          position: "sticky",
-          top: 0,
-          backgroundColor: "transparent",
-          zIndex: 10,
-          borderBottom: "1px solid #ddd",
-        }}
-      >
+      <Box sx={pageHeaderSx}>
         <Typography component="h1" sx={pageTitleSx}>
           Settings
         </Typography>

@@ -6,6 +6,10 @@ import {
   cellWithDivider,
   editableCell,
   editingCell,
+  financePalette,
+  pageHeaderSx,
+  pagePanelCardSx,
+  pageTopActionButtonSx,
 } from "../styles";
 import {
   Box,
@@ -41,7 +45,7 @@ const pageTitleSx = {
 const summaryBoxSx = {
   padding: "0.6rem 1rem",
   borderRadius: "6px",
-  backgroundColor: "#f5f5f5",
+  backgroundColor: financePalette.neutralSoft,
   fontSize: "1.1rem",
   fontWeight: 600,
   whiteSpace: "nowrap",
@@ -71,6 +75,28 @@ function formatFixedExpenseCategory(category: string | number): string {
   }
 
   return category;
+}
+
+function resolveCategoryToOptionValue(category: string | number | null | undefined): string {
+  if (category == null) return "";
+
+  if (typeof category === "number" && Number.isFinite(category)) {
+    return String(category);
+  }
+
+  const raw = String(category).trim();
+  if (!raw) return "";
+
+  const numericCategory = Number(raw);
+  if (Number.isFinite(numericCategory)) {
+    return String(numericCategory);
+  }
+
+  const matchedEntry = Object.entries(fixedExpenseCategoryLabels).find(
+    ([, label]) => label.toLowerCase() === raw.toLowerCase()
+  );
+
+  return matchedEntry ? matchedEntry[0] : raw;
 }
 
 export default function FixedExpensesList() {
@@ -107,7 +133,11 @@ export default function FixedExpensesList() {
     initialValue: string | number | null | undefined
   ) {
     setEditing({ id, field });
-    setLocalEditValue(initialValue != null ? String(initialValue) : "");
+    if (field === "category") {
+      setLocalEditValue(resolveCategoryToOptionValue(initialValue));
+    } else {
+      setLocalEditValue(initialValue != null ? String(initialValue) : "");
+    }
     setPaymentDayInlineError("");
   }
 
@@ -208,20 +238,7 @@ export default function FixedExpensesList() {
   return (
     <Box sx={{ width: "100%" }}>
       {/* HEADER */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-          pb: 1,
-          position: "sticky",
-          top: 0,
-          backgroundColor: "transparent",
-          zIndex: 10,
-          borderBottom: "1px solid #ddd"
-        }}
-      >
+      <Box sx={pageHeaderSx}>
         <Typography component="h1" sx={pageTitleSx}>
           Fixed Expenses
         </Typography>
@@ -241,13 +258,7 @@ export default function FixedExpensesList() {
         startIcon={<ReceiptLongOutlinedIcon fontSize="small" />}
         onClick={() => setOpenAddExpense(true)}
         sx={{
-          mb: 2,
-          px: 1.5,
-          py: 0.5,
-          fontSize: "0.8rem",
-          fontWeight: 600,
-          borderRadius: "10px",
-          textTransform: "none",
+          ...pageTopActionButtonSx,
           backgroundColor: "#475569",
           "&:hover": {
             backgroundColor: "#334155",
@@ -257,7 +268,14 @@ export default function FixedExpensesList() {
         Add Expense
       </Button>
 
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          ...pagePanelCardSx,
+          p: 0,
+          overflow: "hidden",
+        }}
+      >
         <Table size="small">
           <TableHead sx={headerStyle}>
             <TableRow>

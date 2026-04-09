@@ -25,7 +25,17 @@ import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
-import { headerStyle, headerCellStyle, cellWithDivider, editableCell, editingCell } from "../styles";
+import {
+  headerStyle,
+  headerCellStyle,
+  cellWithDivider,
+  editableCell,
+  editingCell,
+  financePalette,
+  pageHeaderSx,
+  pagePanelCardSx,
+  pageTopActionButtonSx,
+} from "../styles";
 
 import AddDebtModal from "../components/AddDebtModal";
 import AddPaymentModal from "../components/AddPaymentModal";
@@ -44,7 +54,7 @@ const pageTitleSx = {
 const summaryBoxSx = {
   padding: "0.6rem 1rem",
   borderRadius: "6px",
-  backgroundColor: "#f5f5f5",
+  backgroundColor: financePalette.neutralSoft,
   fontSize: "1.1rem",
   fontWeight: 600,
   whiteSpace: "nowrap",
@@ -222,20 +232,7 @@ useEffect(() => {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-          pb: 1,
-          position: "sticky",
-          top: 0,
-          backgroundColor: "transparent",
-          zIndex: 10,
-          borderBottom: "1px solid #ddd",
-        }}
-      >
+      <Box sx={pageHeaderSx}>
         <Typography component="h1" sx={pageTitleSx}>
           Debts
         </Typography>
@@ -258,13 +255,7 @@ useEffect(() => {
         size="small"
         startIcon={<ReceiptLongOutlinedIcon fontSize="small" />}
         sx={{
-          mb: 2,
-          px: 1.5,
-          py: 0.5,
-          fontSize: "0.8rem",
-          fontWeight: 600,
-          borderRadius: "10px",
-          textTransform: "none",
+          ...pageTopActionButtonSx,
           backgroundColor: "#e89a9a",
           color: "#5f1d1d",
           "&:hover": {
@@ -275,7 +266,14 @@ useEffect(() => {
       >
         Add Debt
       </Button>
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          ...pagePanelCardSx,
+          p: 0,
+          overflow: "hidden",
+        }}
+      >
         <Table
           size="small"
           sx={{

@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { investmentReportService } from "../services/investmentReportingService";
 import type { InvestmentSummary } from "../types/Investments";
-import { headerStyle, headerCellStyle, cellWithDivider } from "../styles";
+import {
+  headerStyle,
+  headerCellStyle,
+  cellWithDivider,
+  financePalette,
+  pageHeaderSx,
+  pagePanelCardSx,
+} from "../styles";
 
 import {
   Box,
@@ -27,7 +34,7 @@ const pageTitleSx = {
 const summaryBoxSx = {
   padding: "0.6rem 1rem",
   borderRadius: "6px",
-  backgroundColor: "#f5f5f5",
+  backgroundColor: financePalette.neutralSoft,
   fontSize: "1.1rem",
   fontWeight: 600,
   whiteSpace: "nowrap",
@@ -43,20 +50,7 @@ export default function InvestmentByYear() {
   return (
     <Box sx={{ width: "100%" }}>
       {/* HEADER */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-          pb: 1,
-          position: "sticky",
-          top: 0,
-          backgroundColor: "transparent",
-          zIndex: 10,
-          borderBottom: "1px solid #ddd"
-        }}
-      >
+      <Box sx={pageHeaderSx}>
         <Typography component="h1" sx={pageTitleSx}>
           Investment by Year
         </Typography>
@@ -71,7 +65,14 @@ export default function InvestmentByYear() {
       </Box>
 
       {/* TABLE */}
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          ...pagePanelCardSx,
+          p: 0,
+          overflow: "hidden",
+        }}
+      >
         <Table size="small">
           <TableHead sx={headerStyle}>
             <TableRow>
