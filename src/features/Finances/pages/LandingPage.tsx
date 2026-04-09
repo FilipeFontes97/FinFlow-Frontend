@@ -1,5 +1,6 @@
-import { Box, Button, Divider, Grid, Typography } from "@mui/material";
+import { Box, Divider, Grid, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
 import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
 import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
@@ -7,6 +8,7 @@ import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import { financePalette, pagePanelCardSx } from "../styles";
 import finflowLogo from "../../../assets/finflowlogo.png";
+import { settingsService } from "../services/settingsService";
 
 const features = [
   {
@@ -43,6 +45,20 @@ const features = [
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    const loadUserName = async () => {
+      try {
+        const settings = await settingsService.get();
+        setUserName(settings.name || "");
+      } catch {
+        setUserName("");
+      }
+    };
+
+    loadUserName();
+  }, []);
 
   return (
     <Box sx={{ maxWidth: 860, mx: "auto", py: 4 }}>
@@ -87,12 +103,12 @@ export default function LandingPage() {
 
           <Box sx={{ textAlign: { xs: "center", md: "left" }, minWidth: 0, flex: 1 }}>
             <Typography variant="h5" fontWeight={700} color="#0f172a" sx={{ mb: 0.5 }}>
-              Welcome to FinFlow
+              Welcome {userName}!
             </Typography>
             <Typography variant="body2" color="#475569" sx={{ maxWidth: 640, mb: 1.5 }}>
               Your personal finance command center. Track accounts, control expenses, manage debts, and watch your investments grow in one place.
             </Typography>
-            <Button
+            {/* <Button
               variant="contained"
               size="medium"
               onClick={() => navigate("/dashboard")}
@@ -107,13 +123,13 @@ export default function LandingPage() {
               }}
             >
               Go to Dashboard
-            </Button>
+            </Button> */}
           </Box>
         </Box>
       </Box>
 
       <Divider sx={{ mb: 4 }}>
-        <Typography variant="caption" color="#0f0f0f" fontWeight={600} letterSpacing="0.08em" textTransform="uppercase">
+        <Typography variant="caption" color="#000000" fontWeight={600} letterSpacing="0.08em" textTransform="uppercase">
           What you can do
         </Typography>
       </Divider>

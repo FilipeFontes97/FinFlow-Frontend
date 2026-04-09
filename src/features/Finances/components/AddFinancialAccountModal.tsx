@@ -11,6 +11,7 @@ import {
 
 import { financialAccountService } from "../services/financialAccountService";
 import type { CreateFinancialAccountRequest } from "../types/FinancialAccount";
+import { isValidDecimalInput, parseLocaleDecimal } from "../utils/numberInput";
 import {
   dialogActionsSx,
   dialogTitleSx,
@@ -62,7 +63,7 @@ type FormErrors = {
     field: string
   ) {
     const v = e.target.value;
-    if (/^[0-9]*\.?[0-9]*$/.test(v) || v === "") {
+    if (isValidDecimalInput(v)) {
       updateField(field, v);
     }
   }
@@ -70,8 +71,8 @@ type FormErrors = {
   async function handleSubmit() {
     if (!validate()) return;
 
-    const invested = form.valueInvested === "" ? null : Number(form.valueInvested);
-    const current = form.currentValue === "" ? invested : Number(form.currentValue);
+    const invested = form.valueInvested === "" ? null : parseLocaleDecimal(form.valueInvested);
+    const current = form.currentValue === "" ? invested : parseLocaleDecimal(form.currentValue);
 
     const payload: CreateFinancialAccountRequest = {
       name: form.name,
