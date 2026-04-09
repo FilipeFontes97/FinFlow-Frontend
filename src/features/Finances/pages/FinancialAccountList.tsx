@@ -5,7 +5,11 @@ import {
   headerCellStyle,
   editableCell,
   editingCell,
-  cellWithDivider 
+  cellWithDivider,
+  financePalette,
+  pageHeaderSx,
+  pagePanelCardSx,
+  pageTopActionButtonSx,
 } from "../styles";
 
 import type {
@@ -48,7 +52,7 @@ const pageTitleSx = {
 const summaryBoxSx = {
   padding: "0.6rem 1rem",
   borderRadius: "6px",
-  backgroundColor: "#f5f5f5",
+  backgroundColor: financePalette.neutralSoft,
   fontSize: "1.1rem",
   fontWeight: 600,
   whiteSpace: "nowrap",
@@ -61,9 +65,7 @@ export default function FinancialAccountList() {
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [openAddInvestment, setOpenAddInvestment] = useState(false);
-
-const [selectedAccountId, setSelectedAccountId] = useState<string>("");
-
+  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
 
   const [editing, setEditing] = useState<{
     id: string;
@@ -73,9 +75,9 @@ const [selectedAccountId, setSelectedAccountId] = useState<string>("");
   const [localEditValue, setLocalEditValue] = useState<string>("");
 
   async function loadAccounts() {
-  const accounts = await financialAccountService.getAll();
-  setData(accounts);
-}
+    const accounts = await financialAccountService.getAll();
+    setData(accounts);
+  }
 
   function handleDeleteClick(id: string) {
     setSelectedId(id);
@@ -152,61 +154,37 @@ const [selectedAccountId, setSelectedAccountId] = useState<string>("");
 
   return (
     <Box sx={{ width: "100%" }}>
+      <Box sx={pageHeaderSx}>
+        <Typography component="h1" sx={pageTitleSx}>
+          Financial Accounts
+        </Typography>
 
-      {data && (
-        <Box
-  sx={{ 
-    display: "flex", 
-    alignItems: "center", 
-    justifyContent: "space-between",
-    mb: 2,
-    position: "sticky",
-    top: 0,
-    zIndex: 5,
-    backgroundColor: "transparent",
-    pb: 1,
-    borderBottom: "1px solid #ddd"
-  }}
->
-  <Box>
-    <Typography component="h1" sx={pageTitleSx}>
-      Financial Accounts
-    </Typography>
-  </Box>
+        <Box sx={summaryBoxSx}>
+          Net Worth:{" "}
+          {data
+            ? data.totalCurrentValue.toLocaleString("pt-PT", {
+                style: "currency",
+                currency: "EUR",
+              })
+            : "-"}
+        </Box>
+      </Box>
 
-  {data && (
-    <Box sx={summaryBoxSx}>
-      Net Worth:{" "}
-      {data.totalCurrentValue.toLocaleString("pt-PT", {
-        style: "currency",
-        currency: "EUR",
-      })}
-    </Box>
-  )}
-
-</Box>
-    )}
-
-    <Button
-  variant="contained"
-  size="small"
-  startIcon={<SavingsOutlinedIcon fontSize="small" />}
-  sx={{
-    mb: 2,
-    px: 1.5,
-    py: 0.5,
-    fontSize: "0.8rem",
-    fontWeight: 600,
-    borderRadius: "10px",
-    textTransform: "none",
-    backgroundColor: "#059669",
-    "&:hover": {
-      backgroundColor: "#047857",
-    },
-  }}
-  onClick={() => setOpenAdd(true)}>
-  Add Account
-</Button>
+      <Button
+        variant="contained"
+        size="small"
+        startIcon={<SavingsOutlinedIcon fontSize="small" />}
+        sx={{
+          ...pageTopActionButtonSx,
+          backgroundColor: "#059669",
+          "&:hover": {
+            backgroundColor: "#047857",
+          },
+        }}
+        onClick={() => setOpenAdd(true)}
+      >
+        Add Account
+      </Button>
 
       <AddFinancialAccountModal
         open={openAdd}
@@ -214,15 +192,21 @@ const [selectedAccountId, setSelectedAccountId] = useState<string>("");
         onCreated={() => financialAccountService.getAll().then(setData)}
       />
 
+      <AddInvestmentModal
+        open={openAddInvestment}
+        financialAccountId={selectedAccountId}
+        onClose={() => setOpenAddInvestment(false)}
+        onAdded={loadAccounts}
+      />
 
- <AddInvestmentModal
-  open={openAddInvestment}
-  financialAccountId={selectedAccountId}
-  onClose={() => setOpenAddInvestment(false)}
-  onAdded={loadAccounts}
-/>
-
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          ...pagePanelCardSx,
+          p: 0,
+          overflow: "hidden",
+        }}
+      >
         <Table
           size="small"
           sx={{

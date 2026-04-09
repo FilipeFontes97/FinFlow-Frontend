@@ -15,6 +15,33 @@ import finflowLogo from "../../../assets/finflowlogo.png";
 
 const drawerWidth = 220;
 
+function navItemSx(selected: boolean, nested = false) {
+  return {
+    mb: 0.5,
+    px: 1,
+    pl: nested ? 3 : 1,
+    py: 0.6,
+    borderRadius: "8px",
+    mx: 0.8,
+    color: selected ? "#0f172a" : "#334155",
+    backgroundColor: selected ? "rgba(8, 168, 16, 0.14)" : "transparent",
+    borderLeft: selected ? "3px solid #08a810" : "3px solid transparent",
+    transition: "all 0.16s ease",
+    "&:hover": {
+      backgroundColor: selected ? "rgba(8, 168, 16, 0.18)" : "rgba(15, 23, 42, 0.06)",
+    },
+    "& .MuiListItemIcon-root": {
+      minWidth: 34,
+      color: selected ? "#08a810" : "#475569",
+    },
+    "& .MuiListItemText-primary": {
+      fontWeight: selected ? 700 : 600,
+      fontSize: "0.92rem",
+      letterSpacing: "0.01em",
+    },
+  };
+}
+
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -69,17 +96,18 @@ export default function Sidebar() {
         sx={{
           p: 1.5,
           textAlign: "center",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.6)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.65)",
+          backgroundColor: "rgba(255, 255, 255, 0.42)",
           cursor: "pointer",
         }}
       >
-        <img src={finflowLogo} alt="FinFlow Logo" style={{ height: 50, width: "auto" }} />
+        <img src={finflowLogo} alt="FinFlow Logo" style={{ height: 66, width: "auto" }} />
       </Box>
       <List sx={{ mt: 0, p: 0 }}>
         <ListItemButton
           selected={location.pathname === "/"}
           onClick={() => navigate("/")}
-          sx={{ mb: 1, px: 1 }}
+          sx={navItemSx(location.pathname === "/")}
         >
           <ListItemIcon>
             <HomeOutlinedIcon />
@@ -90,7 +118,7 @@ export default function Sidebar() {
         <ListItemButton
           selected={isManagementRoute}
           onClick={handleToggleManagement}
-          sx={{ mb: 1, px: 1 }}
+          sx={navItemSx(isManagementRoute)}
         >
           <ListItemIcon>
             <ManageAccountsOutlinedIcon />
@@ -104,7 +132,7 @@ export default function Sidebar() {
             <ListItemButton
               selected={location.pathname === "/accounts"}
               onClick={() => navigateToManagement("/accounts")}
-              sx={{ mb: 1, px: 1, pl: 3 }}
+              sx={navItemSx(location.pathname === "/accounts", true)}
             >
               <ListItemIcon>
                 <AccountBalanceIcon />
@@ -115,7 +143,7 @@ export default function Sidebar() {
             <ListItemButton
               selected={location.pathname === "/fixed-expenses"}
               onClick={() => navigateToManagement("/fixed-expenses")}
-              sx={{ mb: 1, px: 1, pl: 3 }}
+              sx={navItemSx(location.pathname === "/fixed-expenses", true)}
             >
               <ListItemIcon>
                 <RequestQuoteOutlinedIcon />
@@ -124,25 +152,25 @@ export default function Sidebar() {
             </ListItemButton>
 
             <ListItemButton
-              selected={location.pathname === "/investments-by-year"}
-              onClick={() => navigateToManagement("/investments-by-year")}
-              sx={{ mb: 1, px: 1, pl: 3 }}
-            >
-              <ListItemIcon>
-                <ReceiptLongOutlinedIcon />
-              </ListItemIcon>
-              <ListItemText primary="Investment Records" />
-            </ListItemButton>
-
-            <ListItemButton
               selected={location.pathname === "/debts"}
               onClick={() => navigateToManagement("/debts")}
-              sx={{ mb: 1, px: 1, pl: 3 }}
+              sx={navItemSx(location.pathname === "/debts", true)}
             >
               <ListItemIcon>
                 <CreditCardIcon />
               </ListItemIcon>
               <ListItemText primary="Debts" />
+            </ListItemButton>
+
+                        <ListItemButton
+              selected={location.pathname === "/investments-by-year"}
+              onClick={() => navigateToManagement("/investments-by-year")}
+              sx={navItemSx(location.pathname === "/investments-by-year", true)}
+            >
+              <ListItemIcon>
+                <ReceiptLongOutlinedIcon />
+              </ListItemIcon>
+              <ListItemText primary="Investment Records" />
             </ListItemButton>
 
           </List>
@@ -151,7 +179,7 @@ export default function Sidebar() {
         <ListItemButton
           selected={location.pathname === "/settings"}
           onClick={() => navigate("/settings")}
-          sx={{ mb: 1, px: 1 }}
+          sx={navItemSx(location.pathname === "/settings")}
         >
           <ListItemIcon>
             <SettingsOutlinedIcon />

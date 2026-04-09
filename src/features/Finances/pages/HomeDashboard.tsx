@@ -11,6 +11,7 @@ import {
 import { dashboardService } from "../services/dashboardService";
 import type { DashboardOverview } from "../services/dashboardService";
 import DashboardSignals from "../components/DashboardSignals";
+import { financePalette, pageHeaderSx, pagePanelCardSx } from "../styles";
 
 const pageTitleSx = {
   margin: 0,
@@ -24,7 +25,7 @@ const pageTitleSx = {
 const summaryBoxSx = {
   padding: "0.6rem 1rem",
   borderRadius: "6px",
-  backgroundColor: "#f5f5f5",
+  backgroundColor: financePalette.neutralSoft,
   fontSize: "1.1rem",
   fontWeight: 600,
   whiteSpace: "nowrap",
@@ -87,20 +88,7 @@ export default function HomeDashboard() {
   return (
     <Box sx={{ width: "100%" }}>
       {/* HEADER */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-          pb: 1,
-          position: "sticky",
-          top: 0,
-          backgroundColor: "transparent",
-          zIndex: 10,
-          borderBottom: "1px solid #ddd",
-        }}
-      >
+      <Box sx={pageHeaderSx}>
         <Typography component="h1" sx={pageTitleSx}>
           Home Dashboard
         </Typography>
@@ -124,7 +112,7 @@ export default function HomeDashboard() {
             gap: 2,
           }}
         >
-          <Paper sx={{ p: 2 }}>
+          <Paper sx={pagePanelCardSx}>
             <Typography variant="caption" color="text.secondary">
               Net Worth
             </Typography>
@@ -133,7 +121,7 @@ export default function HomeDashboard() {
             </Typography>
           </Paper>
 
-          <Paper sx={{ p: 2 }}>
+          <Paper sx={pagePanelCardSx}>
             <Typography variant="caption" color="text.secondary">
               Debt
             </Typography>
@@ -142,7 +130,7 @@ export default function HomeDashboard() {
             </Typography>
           </Paper>
 
-          <Paper sx={{ p: 2 }}>
+          <Paper sx={pagePanelCardSx}>
             <Typography variant="caption" color="text.secondary">
               Monthly Fixed Expenses
             </Typography>
@@ -151,7 +139,7 @@ export default function HomeDashboard() {
             </Typography>
           </Paper>
 
-          <Paper sx={{ p: 2 }}>
+          <Paper sx={pagePanelCardSx}>
             <Typography variant="caption" color="text.secondary">
               All-Time Invested
             </Typography>
@@ -170,7 +158,7 @@ export default function HomeDashboard() {
           }}
         >
           {/* ASSET ALLOCATION */}
-          <Paper sx={{ p: 2 }}>
+          <Paper sx={pagePanelCardSx}>
             <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>
               Asset Allocation by Account Type
             </Typography>
@@ -202,7 +190,7 @@ export default function HomeDashboard() {
                     sx={{
                       height: 10,
                       borderRadius: 10,
-                      backgroundColor: "#e2e8f0",
+                      backgroundColor: financePalette.neutralBorder,
                     }}
                   >
                     <Box
@@ -221,7 +209,7 @@ export default function HomeDashboard() {
           </Paper>
 
           {/* INVESTMENTS BY YEAR */}
-          <Paper sx={{ p: 2 }}>
+          <Paper sx={pagePanelCardSx}>
             <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>
               Investments by Year
             </Typography>
@@ -232,7 +220,7 @@ export default function HomeDashboard() {
                 display: "flex",
                 alignItems: "flex-end",
                 gap: 1,
-                borderBottom: "1px solid #e2e8f0",
+                borderBottom: `1px solid ${financePalette.neutralBorder}`,
                 pt: 1,
               }}
             >
