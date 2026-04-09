@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { debtService } from "../services/debtService";
 import type { DebtResponse, PaymentPortionsValue } from "../types/Debt";
-import { DebtStatus } from "../types/Debt";
 import type { Payment } from "../types/Debt";
 
 import {
@@ -50,6 +49,11 @@ const summaryBoxSx = {
   fontWeight: 600,
   whiteSpace: "nowrap",
 };
+
+function isDebtPaid(debt: DebtResponse): boolean {
+  // Small tolerance avoids floating point leftovers like 0.0000001.
+  return debt.remainingAmount <= 0.009;
+}
 
 export default function DebtList() {
   const [debts, setDebts] = useState<DebtResponse[]>([]);
@@ -192,6 +196,8 @@ export default function DebtList() {
 }
 
 async function payInstallment(debt: DebtResponse) {
+  if (isDebtPaid(debt)) return;
+
   const amount = calculateNextInstallment(debt);
 
   if (amount <= 0) return;
@@ -419,12 +425,12 @@ useEffect(() => {
                   <Chip
                     size="small"
                     label={
-                      d.debtStatus === DebtStatus.Paid
+                      isDebtPaid(d)
                         ? "Paid"
                         : "In Debt"
                     }
                     color={
-                      d.debtStatus === DebtStatus.Paid
+                      isDebtPaid(d)
                         ? "success"
                         : "warning"
                     }
@@ -438,7 +444,7 @@ useEffect(() => {
                         size="small"
                         color="primary"
                         aria-label="add payment"
-                        disabled={d.debtStatus === DebtStatus.Paid}
+                        disabled={isDebtPaid(d)}
                         onClick={() => {
                           setSelectedDebtId(d.id);
                           setOpenAddPayment(true);
@@ -454,7 +460,7 @@ useEffect(() => {
                           size="small"
                           color="success"
                           aria-label="pay next installment"
-                          disabled={d.debtStatus === DebtStatus.Paid}
+                          disabled={isDebtPaid(d)}
                           onClick={() => payInstallment(d)}
                         >
                           <PriceCheckOutlinedIcon fontSize="small" />

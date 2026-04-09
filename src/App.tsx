@@ -5,6 +5,7 @@ import FixedExpensesList from "./features/Finances/pages/FixedExpensesList";
 import AppLayout from "./layout/AppLayout";
 import InvestmentByYear from "./features/Finances/pages/InvestmentByYear";
 import HomeDashboard from "./features/Finances/pages/HomeDashboard";
+import SettingsPage from "./features/Finances/pages/SettingsPage";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
            <Route path="/fixed-expenses" element={<FixedExpensesList />} />
           <Route path="/debts" element={<DebtList />} />
           <Route path="/investments-by-year" element={<InvestmentByYear />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

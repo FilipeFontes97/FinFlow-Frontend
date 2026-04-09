@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Collapse, Drawer, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
@@ -6,6 +6,7 @@ import CreditCardIcon from "@mui/icons-material/CreditCard";
 import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -24,13 +25,26 @@ export default function Sidebar() {
     "/debts",
   ].includes(location.pathname);
 
-  const [openManagement, setOpenManagement] = useState(isManagementRoute);
+  const [openManagementOffRoute, setOpenManagementOffRoute] = useState(false);
+  const [collapseOnManagementRoute, setCollapseOnManagementRoute] = useState(false);
 
-  useEffect(() => {
+  const openManagement = isManagementRoute
+    ? !collapseOnManagementRoute
+    : openManagementOffRoute;
+
+  const handleToggleManagement = () => {
     if (isManagementRoute) {
-      setOpenManagement(true);
+      setCollapseOnManagementRoute((prev) => !prev);
+      return;
     }
-  }, [isManagementRoute]);
+
+    setOpenManagementOffRoute((prev) => !prev);
+  };
+
+  const navigateToManagement = (path: string) => {
+    setCollapseOnManagementRoute(false);
+    navigate(path);
+  };
 
   return (
     <Drawer
@@ -63,7 +77,7 @@ export default function Sidebar() {
 
         <ListItemButton
           selected={isManagementRoute}
-          onClick={() => setOpenManagement((prev) => !prev)}
+          onClick={handleToggleManagement}
           sx={{ mb: 1, px: 1 }}
         >
           <ListItemIcon>
@@ -77,7 +91,7 @@ export default function Sidebar() {
           <List component="div" disablePadding>
             <ListItemButton
               selected={location.pathname === "/accounts"}
-              onClick={() => navigate("/accounts")}
+              onClick={() => navigateToManagement("/accounts")}
               sx={{ mb: 1, px: 1, pl: 3 }}
             >
               <ListItemIcon>
@@ -88,7 +102,7 @@ export default function Sidebar() {
 
             <ListItemButton
               selected={location.pathname === "/fixed-expenses"}
-              onClick={() => navigate("/fixed-expenses")}
+              onClick={() => navigateToManagement("/fixed-expenses")}
               sx={{ mb: 1, px: 1, pl: 3 }}
             >
               <ListItemIcon>
@@ -99,7 +113,7 @@ export default function Sidebar() {
 
             <ListItemButton
               selected={location.pathname === "/investments-by-year"}
-              onClick={() => navigate("/investments-by-year")}
+              onClick={() => navigateToManagement("/investments-by-year")}
               sx={{ mb: 1, px: 1, pl: 3 }}
             >
               <ListItemIcon>
@@ -110,7 +124,7 @@ export default function Sidebar() {
 
             <ListItemButton
               selected={location.pathname === "/debts"}
-              onClick={() => navigate("/debts")}
+              onClick={() => navigateToManagement("/debts")}
               sx={{ mb: 1, px: 1, pl: 3 }}
             >
               <ListItemIcon>
@@ -118,8 +132,20 @@ export default function Sidebar() {
               </ListItemIcon>
               <ListItemText primary="Debts" />
             </ListItemButton>
+
           </List>
         </Collapse>
+
+        <ListItemButton
+          selected={location.pathname === "/settings"}
+          onClick={() => navigate("/settings")}
+          sx={{ mb: 1, px: 1 }}
+        >
+          <ListItemIcon>
+            <SettingsOutlinedIcon />
+          </ListItemIcon>
+          <ListItemText primary="Settings" />
+        </ListItemButton>
 
       </List>
     </Drawer>

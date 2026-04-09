@@ -11,6 +11,12 @@ export interface DashboardInvestmentByYear {
   totalInvested: number;
 }
 
+export interface DashboardSignal {
+  code: string;
+  message: string;
+level: "Info" | "Warning" | "Danger";
+}
+
 export interface DashboardOverview {
   assets: number;
   debts: number;
@@ -19,6 +25,7 @@ export interface DashboardOverview {
   netPosition: number;
   assetAllocation: DashboardAllocation[];
   investmentsByYear: DashboardInvestmentByYear[];
+  signals?: DashboardSignal[];
 }
 
 export const dashboardService = {
