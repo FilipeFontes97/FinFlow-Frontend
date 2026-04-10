@@ -1,6 +1,8 @@
 import { Box, CssBaseline } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../features/Finances/components/Sidebar";
+import FloatingCalculatorButton from "../features/Finances/components/FloatingCalculatorButton";
+import FloatingCalculatorPanel from "../features/Finances/components/FloatingCalculatorPanel";
 import sharkBg from "../assets/sharkbackground.png";
 
 export default function AppLayout() {
@@ -23,6 +25,9 @@ export default function AppLayout() {
       >
         <Outlet />
       </Box>
+
+      <FloatingCalculatorPanel />
+      <FloatingCalculatorButton />
     </Box>
   );
 }
