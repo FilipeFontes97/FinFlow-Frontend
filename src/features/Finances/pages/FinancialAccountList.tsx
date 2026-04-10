@@ -231,7 +231,7 @@ export default function FinancialAccountList() {
             {data?.financialAccountList.map((acc) => (
               <TableRow key={acc.id}>
                 <TableCell
-                  sx={{ ...editableCell, ...cellWithDivider }}
+                  sx={{ ...editableCell, ...cellWithDivider, fontWeight: 'bold' }}
                   onClick={() => startEdit(acc.id, "type", acc.type)}
                 >
                   {editing?.id === acc.id && editing.field === "type" ? (

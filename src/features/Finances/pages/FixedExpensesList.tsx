@@ -292,7 +292,7 @@ export default function FixedExpensesList() {
             {expenses.map(e => (
               <TableRow key={e.id}>
                 <TableCell
-                  sx={{ ...editableCell, ...cellWithDivider }}
+                  sx={{ ...editableCell, ...cellWithDivider, fontWeight: 'bold' }}
                   onClick={() => startEdit(e.id, "category", e.category)}
                 >
                   {editing?.id === e.id && editing.field === "category" ? (

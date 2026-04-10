@@ -86,7 +86,7 @@ export default function InvestmentByYear() {
           <TableBody>
             {data?.byYear.map((row) => (
               <TableRow key={row.year}>
-                <TableCell sx={cellWithDivider}>{row.year}</TableCell>
+                <TableCell sx={{ ...cellWithDivider, fontWeight: 'bold' }}>{row.year}</TableCell>
                 <TableCell align="right" sx={cellWithDivider}>
                   {row.totalInvested.toLocaleString("pt-PT", {
                     style: "currency",

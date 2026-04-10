@@ -315,7 +315,7 @@ useEffect(() => {
           <TableBody>
             {debts.map((d) => (
               <TableRow key={d.id}>
-                <TableCell sx={{ ...cellWithDivider }}>{d.itemName}</TableCell>
+                <TableCell sx={{ ...cellWithDivider, fontWeight: 'bold' }}>{d.itemName}</TableCell>
 
                 <TableCell sx={{ ...cellWithDivider }}>
                   {d.totalAmount.toLocaleString("pt-PT", {
